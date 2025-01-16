@@ -16,8 +16,8 @@ n=5
 A = torch.full((n, n), 1.0 / n, device=device)
 
 train(
-    algorithm="PullDiag_GT",
-    lr=1e-1,
+    algorithm="PullDiag_GD",
+    lr=3e-2,
     A=A,
     dataset_name="MNIST",
     batch_size=256,
