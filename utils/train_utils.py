@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import itertools
 from torch.cuda.amp import autocast
+from typing import Tuple
 
 def get_first_batch(trainloader_list: list):
     h_data_train = []
@@ -23,7 +24,9 @@ def get_first_batch(trainloader_list: list):
 
     return h_data_train, y_data_train
 
-def compute_test_loss_and_accuracy(model_class, model_list, testloader, use_amp=False):
+def compute_loss_and_accuracy(
+    model_class, model_list, testloader, full_trainloader, use_amp=False
+) -> Tuple[float, float, float, float]:
     # 使用 CrossEntropyLoss 作为默认损失函数
     criterion = nn.CrossEntropyLoss()
 
@@ -52,11 +55,39 @@ def compute_test_loss_and_accuracy(model_class, model_list, testloader, use_amp=
     # 将平均参数加载到新模型中
     avg_model.load_state_dict(avg_state_dict)
 
-    # Step 2: Evaluate the new model's loss and accuracy using test_loader
+    # Step 2: Evaluate the new model's loss and accuracy on the training set
     avg_model.eval()
-    correct = 0
-    total = 0
-    total_loss = 0.0
+    train_correct = 0
+    train_total = 0
+    train_total_loss = 0.0
+
+    with torch.no_grad():
+        for inputs, labels in full_trainloader:
+            inputs, labels = inputs.to(device, non_blocking=True), labels.to(
+                device, non_blocking=True
+            )
+
+            with autocast(enabled=use_amp):
+                # 前向传播
+                outputs = avg_model(inputs)
+                loss = criterion(outputs, labels)
+
+            # 汇总损失
+            train_total_loss += loss.item()
+
+            # 计算准确率
+            _, predicted = torch.max(outputs, 1)
+            train_correct += (predicted == labels).sum().item()
+            train_total += labels.size(0)
+
+    # 计算训练集的平均损失和准确率
+    train_average_loss = train_total_loss / len(full_trainloader)
+    train_accuracy = train_correct / train_total
+
+    # Step 3: Evaluate the new model's loss and accuracy on the test set
+    test_correct = 0
+    test_total = 0
+    test_total_loss = 0.0
 
     with torch.no_grad():
         for inputs, labels in testloader:
@@ -70,15 +101,20 @@ def compute_test_loss_and_accuracy(model_class, model_list, testloader, use_amp=
                 loss = criterion(outputs, labels)
 
             # 汇总损失
-            total_loss += loss.item()
+            test_total_loss += loss.item()
 
             # 计算准确率
             _, predicted = torch.max(outputs, 1)
-            correct += (predicted == labels).sum().item()
-            total += labels.size(0)
+            test_correct += (predicted == labels).sum().item()
+            test_total += labels.size(0)
 
-    # 计算最终的平均损失和准确率
-    average_loss = total_loss / (len(testloader))  # 两次标准化
-    accuracy = correct / total
+    # 计算测试集的平均损失和准确率
+    test_average_loss = test_total_loss / len(testloader)
+    test_accuracy = test_correct / test_total
 
-    return average_loss, accuracy
+    return (
+        train_average_loss,
+        train_accuracy,
+        test_average_loss,
+        test_accuracy,
+    )

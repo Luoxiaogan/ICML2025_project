@@ -11,15 +11,23 @@ if project_root not in sys.path:
 
 from training import train
 import torch
+from utils import ring1, ring2, ring3, ring4, show_row
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-n=5
-A = torch.full((n, n), 1.0 / n, device=device)
+
+n=15
+A, B = ring1(n=n)
+show_row(A)
+A = torch.from_numpy(A).float()
+A = torch.matrix_power(A, 5)
+print(A.shape)
 
 train(
-    algorithm="PullDiag_GD",
-    lr=3e-2,
+    algorithm="PullDiag_GT",
+    lr=4e-2,
     A=A,
     dataset_name="MNIST",
-    batch_size=256,
+    batch_size=640,
     num_epochs=100,
+    remark="MG=5, ring1",
 )

@@ -199,3 +199,24 @@ def new_ResNet101():
 
 def new_ResNet152():
     return ResNet2(Bottleneck, [3, 8, 36, 3])
+
+class MNISTCNN(nn.Module):
+    def __init__(self):
+        super(MNISTCNN, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)  # 卷积层1
+        self.bn1 = nn.BatchNorm2d(32)  # 批归一化
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)  # 卷积层2
+        self.bn2 = nn.BatchNorm2d(64)  # 批归一化
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # 最大池化
+        self.fc1 = nn.Linear(64 * 7 * 7, 128)  # 全连接层1
+        self.dropout = nn.Dropout(0.5)  # Dropout
+        self.fc2 = nn.Linear(128, 10)  # 输出层
+
+    def forward(self, x):
+        x = F.relu(self.bn1(self.conv1(x)))  # 卷积 + 批归一化 + ReLU
+        x = self.pool(F.relu(self.bn2(self.conv2(x))))  # 卷积 + 批归一化 + ReLU + 池化
+        x = x.view(-1, 64 * 7 * 7)  # 展平
+        x = F.relu(self.fc1(x))  # 全连接层 + ReLU
+        x = self.dropout(x)  # Dropout
+        x = self.fc2(x)  # 输出层
+        return x

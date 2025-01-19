@@ -48,7 +48,7 @@ cifar10_transform_test = transforms.Compose(
 
 def get_dataloaders(
     n: int, dataset_name: str, batch_size: int
-) -> Tuple[list, torch.utils.data.DataLoader]:
+) -> Tuple[list, torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     seed = 42
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -112,6 +112,18 @@ def get_dataloaders(
         for subset in subsets
     ]
 
+    # Create a DataLoader for the full training set
+    full_trainloader = torch.utils.data.DataLoader(
+        trainset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=12,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True,
+        generator=generator,
+    )
+
     testloader = torch.utils.data.DataLoader(
         testset,
         batch_size=100,
@@ -123,4 +135,4 @@ def get_dataloaders(
         generator=generator,
     )
 
-    return trainloader_list, testloader
+    return trainloader_list, testloader, full_trainloader
