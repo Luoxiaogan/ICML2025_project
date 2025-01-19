@@ -55,7 +55,7 @@ def train(
         )
         model_class = FullyConnectedMNIST
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test"
+        output_root = "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv"
     
     torch.backends.cudnn.benchmark = True
 

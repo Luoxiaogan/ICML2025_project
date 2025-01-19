@@ -24,7 +24,7 @@ print(A.shape)
 
 train(
     algorithm="PullDiag_GT",
-    lr=4e-2,
+    lr=5e-2,
     A=A,
     dataset_name="MNIST",
     batch_size=640,

@@ -5,11 +5,13 @@ import os
 # 定义文件路径
 file_paths = [
     "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=1, ring1, PullDiag_GT, lr=0.008, n_nodes=15, batch_size=128, 2025-01-19.csv",
-    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=2, ring1, PullDiag_GT, lr=0.016, n_nodes=15, batch_size=256, 2025-01-19.csv"
+    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=2, ring1, PullDiag_GT, lr=0.016, n_nodes=15, batch_size=256, 2025-01-19.csv",
+    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=5, ring1, PullDiag_GT, lr=0.04, n_nodes=15, batch_size=640, 2025-01-19.csv",
+    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=5, ring1, PullDiag_GT, lr=0.05, n_nodes=15, batch_size=640, 2025-01-19.csv"
 ]
 
 # 定义要比较的列
-col = 'train_loss(average)'
+col = 'test_accuracy(average)'
 
 # 创建一个空的DataFrame列表，用于存储每个文件的数据
 dataframes = []
@@ -28,9 +30,9 @@ for i, df in enumerate(dataframes):
     plt.plot(df['epoch'], df[col], label=f'lr={lr}')
 
 # 添加图例、标题和标签
-plt.title('Comparison of Train Loss (Average) for Different Learning Rates')
+plt.title('Comparison')
 plt.xlabel('Epoch')
-plt.ylabel('train_loss(average)')
+plt.ylabel('test_accuracy(average)')
 plt.legend()
 
 # 保存图像到指定路径
