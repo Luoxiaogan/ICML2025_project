@@ -1,4 +1,4 @@
-# training/training_loop.py
+# training/linear_speedup_train_loop.py
 
 import torch
 import os
@@ -12,7 +12,7 @@ from models.fully_connected import FullyConnectedMNIST, two_layer_fc
 from tqdm import tqdm
 from datetime import datetime
 
-def train(
+def train_per_iteration(
     algorithm: str,
     lr: float,  
     A: torch.Tensor,  
@@ -22,7 +22,8 @@ def train(
     remark: str = "",
 )-> pd.DataFrame:
     """
-    执行训练过程。
+    执行逻辑和train函数相同, 只是在每个batch执行结束之后都计算一次avaerage loss
+    即输出的变量是per_iteration记录的, 而不是每个epoch记录的
 
     Args:
         algorithm (str): 算法名称 ('PullDiag_GT' 或 'PullDiag_GD')
@@ -34,6 +35,10 @@ def train(
         num_epochs (int): 训练轮数
         remark (str): 备注
     """
+
+    print("每个节点分配到的图片数目是",50000//A.shape[0])
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     criterion = nn.CrossEntropyLoss()
@@ -54,7 +59,10 @@ def train(
         )
         model_class = FullyConnectedMNIST
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/linear_speedup/test_for_best_lr"
+        output_root = "/root/GanLuo/ICML2025_project/outputs/linear_speedup/csv"
+    
+    batches_per_epoch = len(trainloader_list[0])
+    print("每个epoch执行的iteration次数是", batches_per_epoch)
     
     torch.backends.cudnn.benchmark = True
 
@@ -88,6 +96,9 @@ def train(
     
     print("optimizer初始化成功!")
 
+    epoch_list = []
+    batch_list = []
+    iteration_list = []
     train_loss_history = []
     train_average_loss_history = []
     train_average_accuracy_history = []
@@ -96,8 +107,10 @@ def train(
 
     progress_bar = tqdm(range(num_epochs), desc="Training Progress")
 
+    total_iterations = 0
+
     for epoch in progress_bar:
-        train_loss = 0.0
+        #train_loss = 0.0
 
         for batch_idx, batch in enumerate(zip(*trainloader_list)):
             inputs = [
@@ -109,40 +122,45 @@ def train(
             h_data_train = inputs  # [tensor.to(device) for tensor in inputs]
             y_data_train = labels  # [tensor.to(device) for tensor in labels]
             loss = optimizer.step(closure=closure, lr=lr)
-            train_loss += loss
-        train_loss = train_loss / len(trainloader_list[0])
-        train_loss_history.append(train_loss)
+            train_loss_history.append(round(loss, 4)) 
+            # 这里每个batch结束后都记录一次loss
+        #train_loss = train_loss / len(trainloader_list[0])
+        #train_loss_history.append(train_loss)
 
-        train_average_loss, train_accuracy, test_average_loss, test_accuracy = compute_loss_and_accuracy(
-            model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader
-        )
-        train_average_loss_history.append(train_average_loss)
-        train_average_accuracy_history.append(train_accuracy)
-        test_average_loss_history.append(test_average_loss)
-        test_average_accuracy_history.append(test_accuracy)
+            train_average_loss, train_accuracy, test_average_loss, test_accuracy = compute_loss_and_accuracy(
+                model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader
+            )
 
-        progress_bar.set_postfix(
-            epoch=epoch + 1,
-            train_loss=f"{train_loss_history[-1]:.4f}",
-            train_average_accuracy=f"{100 * train_average_accuracy_history[-1]:.4f}%",
-            test_loss=f"{test_average_loss_history[-1]:.4f}",
-            test_accuracy=f"{100 * test_average_accuracy_history[-1]:.4f}%",
-        )
+            total_iterations += 1
+            epoch_list.append(epoch + 1)
+            batch_list.append(batch_idx + 1)
+            iteration_list.append(total_iterations)
+            train_average_loss_history.append(round(train_average_loss, 4))
+            train_average_accuracy_history.append(round(train_accuracy, 4))
+            test_average_loss_history.append(round(test_average_loss, 4))
+            test_average_accuracy_history.append(round(test_accuracy, 4))
+            # 这里每个batch结束后都计算一次average loss, 先看看会不会让计算明显变慢吧
 
-        today_date = datetime.now().strftime("%Y-%m-%d")
-        
-        # 在每个 epoch 结束后保存数据到 CSV
-        df = pd.DataFrame({
-            "epoch": range(1, epoch + 2),  # epoch 从 1 开始
-            "train_loss(total)": train_loss_history,
-            "train_loss(average)": train_average_loss_history,
-            "train_accuracy(average)": train_average_accuracy_history,
-            "test_loss(average)": test_average_loss_history,
-            "test_accuracy(average)": test_average_accuracy_history,
-        })
-        csv_filename = f"{remark}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
-        #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
-        csv_path = os.path.join(output_root, csv_filename)
-        df.to_csv(csv_path, index=False)
+            df = pd.DataFrame({
+                        "epoch": epoch_list,
+                        "batch": batch_list,
+                        "iteration": iteration_list,
+                        "train_loss(total)": train_loss_history,
+                        "train_loss(average)": train_average_loss_history,
+                        "train_accuracy(average)": train_average_accuracy_history,
+                        "test_loss(average)": test_average_loss_history,
+                        "test_accuracy(average)": test_average_accuracy_history,
+                    })
+            csv_filename = f"{remark}_{algorithm}_lr={lr}_n={n}_bs={batch_size}_{today_date}.csv".replace(" ", "_")
+            csv_path = os.path.join(output_root, csv_filename)
+            df.to_csv(csv_path, index=False)
 
+
+            progress_bar.set_postfix(
+                epoch=epoch + 1,
+                train_loss=f"{train_loss_history[-1]:.4f}",
+                train_average_accuracy=f"{100 * train_average_accuracy_history[-1]:.4f}%",
+                test_loss=f"{test_average_loss_history[-1]:.4f}",
+                test_accuracy=f"{100 * test_average_accuracy_history[-1]:.4f}%",
+            )
     return df
