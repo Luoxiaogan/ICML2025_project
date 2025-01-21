@@ -16,15 +16,16 @@ from utils import ring1, ring2, ring3, ring4, show_row
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 n=5
-A, B = ring1(n=n)
-show_row(A)
+
+import numpy as np
+A = np.full((n, n), 1/n)
 
 train(
     algorithm="PullDiag_GT",
-    lr=1e-1,
+    lr=5e-2,
     A=A,
     dataset_name="MNIST",
     batch_size=500,
-    num_epochs=100,
-    remark="ring",
+    num_epochs=600,
+    remark="全连接A, 取小学习率, 看看收敛到的noise是多少",
 )

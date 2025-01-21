@@ -24,6 +24,17 @@ def get_first_batch(trainloader_list: list):
 
     return h_data_train, y_data_train
 
+def compute_normalized_global_gradient_norm(model):
+    total_norm = 0.0
+    total_elements = 0
+    for p in model.parameters():
+        if p.grad is not None:
+            param_norm = p.grad.detach().data.norm(2)  # 单参数梯度L2范数
+            total_norm += param_norm.item() ** 2       # 平方累加
+            total_elements += p.grad.numel()           # 累加元素数目
+    total_norm = total_norm ** 0.5                     # 全局L2范数
+    return total_norm
+
 def compute_loss_and_accuracy(
     model_class, model_list, testloader, full_trainloader, use_amp=False
 ) -> Tuple[float, float, float, float]:
@@ -112,9 +123,14 @@ def compute_loss_and_accuracy(
     test_average_loss = test_total_loss / len(testloader)
     test_accuracy = test_correct / test_total
 
+    with torch.no_grad():
+        # 计算全局梯度范数
+        global_gradient_norm = compute_normalized_global_gradient_norm(avg_model)
+
     return (
         train_average_loss,
         train_accuracy,
         test_average_loss,
         test_accuracy,
+        global_gradient_norm,
     )

@@ -6,13 +6,20 @@ import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 import random
-from typing import Tuple
+from typing import Tuple, List
 
 # MNIST transforms
-MNIST_transform_train = transforms.Compose(
+""" MNIST_transform_train = transforms.Compose(
     [
         transforms.RandomCrop(28, padding=4),
         transforms.RandomRotation(15),
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,)),
+    ]
+) """
+
+MNIST_transform_train = transforms.Compose(
+    [
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,)),
     ]
@@ -47,8 +54,8 @@ cifar10_transform_test = transforms.Compose(
 
 
 def get_dataloaders(
-    n: int, dataset_name: str, batch_size: int
-) -> Tuple[list, torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    n: int, dataset_name: str, batch_size: int, repeat: int = 1
+) -> Tuple[List[torch.utils.data.DataLoader], torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     seed = 42
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -91,6 +98,13 @@ def get_dataloaders(
     else:
         raise ValueError(f"Unsupported dataset: {dataset_name}")
 
+    # Save the original trainset for full_trainloader
+    original_trainset = trainset
+
+    # Repeat the training dataset if repeat > 1
+    if repeat > 1:
+        trainset = torch.utils.data.ConcatDataset([trainset] * repeat)
+
     total_train_size = len(trainset)
     subset_sizes = [
         total_train_size // n + (1 if i < total_train_size % n else 0) for i in range(n)
@@ -112,9 +126,9 @@ def get_dataloaders(
         for subset in subsets
     ]
 
-    # Create a DataLoader for the full training set
+    # Create a DataLoader for the full training set using the original trainset
     full_trainloader = torch.utils.data.DataLoader(
-        trainset,
+        original_trainset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=12,

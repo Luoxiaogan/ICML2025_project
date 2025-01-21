@@ -8,7 +8,7 @@ from datasets.prepare_data import get_dataloaders
 from utils.train_utils import get_first_batch, compute_loss_and_accuracy
 from training.optimizer import PullDiag_GT, PullDiag_GD
 from models.cnn import new_ResNet18
-from models.fully_connected import FullyConnectedMNIST, two_layer_fc
+from models.fully_connected import FullyConnectedMNIST, SimpleFCN
 from tqdm import tqdm
 from datetime import datetime
 
@@ -43,16 +43,16 @@ def train(
     if dataset_name == "CIFAR10":
         model_list = [new_ResNet18().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(
-            n, dataset_name, batch_size
+            n, dataset_name, batch_size, repeat=1
         )
         model_class = new_ResNet18
         output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10"
     elif dataset_name == "MNIST":
-        model_list = [FullyConnectedMNIST().to(device) for _ in range(n)]
+        model_list = [SimpleFCN().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(
-            n, dataset_name, batch_size
+            n, dataset_name, batch_size, repeat=1
         )
-        model_class = FullyConnectedMNIST
+        model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
         output_root = "/root/GanLuo/ICML2025_project/outputs/linear_speedup/test_for_best_lr"
     
@@ -93,6 +93,7 @@ def train(
     train_average_accuracy_history = []
     test_average_loss_history = []
     test_average_accuracy_history = []
+    grad_norm_history = []
 
     progress_bar = tqdm(range(num_epochs), desc="Training Progress")
 
@@ -113,13 +114,14 @@ def train(
         train_loss = train_loss / len(trainloader_list[0])
         train_loss_history.append(train_loss)
 
-        train_average_loss, train_accuracy, test_average_loss, test_accuracy = compute_loss_and_accuracy(
+        train_average_loss, train_accuracy, test_average_loss, test_accuracy, global_gradient_norm = compute_loss_and_accuracy(
             model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader
         )
         train_average_loss_history.append(train_average_loss)
         train_average_accuracy_history.append(train_accuracy)
         test_average_loss_history.append(test_average_loss)
         test_average_accuracy_history.append(test_accuracy)
+        grad_norm_history.append(global_gradient_norm)
 
         progress_bar.set_postfix(
             epoch=epoch + 1,
@@ -127,6 +129,7 @@ def train(
             train_average_accuracy=f"{100 * train_average_accuracy_history[-1]:.4f}%",
             test_loss=f"{test_average_loss_history[-1]:.4f}",
             test_accuracy=f"{100 * test_average_accuracy_history[-1]:.4f}%",
+            grad_norm=f"{global_gradient_norm:.4f}",
         )
 
         today_date = datetime.now().strftime("%Y-%m-%d")
@@ -139,6 +142,7 @@ def train(
             "train_accuracy(average)": train_average_accuracy_history,
             "test_loss(average)": test_average_loss_history,
             "test_accuracy(average)": test_average_accuracy_history,
+            "global_gradient_norm(average)": grad_norm_history,
         })
         csv_filename = f"{remark}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"

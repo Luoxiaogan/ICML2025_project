@@ -1,17 +1,16 @@
-import pandas as pd
+""" import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
 # 定义文件路径
 file_paths = [
-    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=1, ring1, PullDiag_GT, lr=0.008, n_nodes=15, batch_size=128, 2025-01-19.csv",
-    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=2, ring1, PullDiag_GT, lr=0.016, n_nodes=15, batch_size=256, 2025-01-19.csv",
-    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=5, ring1, PullDiag_GT, lr=0.04, n_nodes=15, batch_size=640, 2025-01-19.csv",
-    "/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/csv/MG=5, ring1, PullDiag_GT, lr=0.05, n_nodes=15, batch_size=640, 2025-01-19.csv"
+    "/root/GanLuo/ICML2025_project/outputs/linear_speedup/test_for_best_lr/ring, PullDiag_GT, lr=0.003, n_nodes=40, batch_size=500, 2025-01-21.csv",
+    "/root/GanLuo/ICML2025_project/outputs/linear_speedup/test_for_best_lr/ring, PullDiag_GT, lr=0.01, n_nodes=40, batch_size=500, 2025-01-21.csv"
 ]
 
 # 定义要比较的列
-col = 'test_accuracy(average)'
+col = 'train_accuracy(average)'
+#可选：'train_loss(average)', 'train_accuracy(average)', 'test_loss(average)', 'test_accuracy(average)'
 
 # 创建一个空的DataFrame列表，用于存储每个文件的数据
 dataframes = []
@@ -32,13 +31,50 @@ for i, df in enumerate(dataframes):
 # 添加图例、标题和标签
 plt.title('Comparison')
 plt.xlabel('Epoch')
-plt.ylabel('test_accuracy(average)')
+plt.ylabel(f'{col}')
 plt.legend()
 
 # 保存图像到指定路径
-output_image_path = f"/root/GanLuo/ICML2025_project/outputs/Multi_Gossip_test/image/MG_com,{col}_comparison.png"
+output_image_path = f"/root/GanLuo/ICML2025_project/outputs/linear_speedup/image/当n=40时,最优的lr是什么?比较{col}.png"
 os.makedirs(os.path.dirname(output_image_path), exist_ok=True)  # 确保目录存在
 plt.savefig(output_image_path)
 
 # 显示图像
+plt.show() """
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 读取CSV文件
+csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/lr=1e-1,batch_size = 128,单机训练的最小loss和grad_norm.csv'
+data = pd.read_csv(csv_path)
+
+# 创建画布和子图
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))  # 1行2列的子图布局
+
+# 左边的图：用log scale画Loss
+ax1.plot(data['Epoch'], data['Loss'], label='Loss', color='blue')
+ax1.set_yscale('log')  # 设置y轴为对数刻度
+ax1.set_title('Loss vs Epoch (Log Scale)')
+ax1.set_xlabel('Epoch')
+ax1.set_ylabel('Loss (log scale)')
+ax1.legend()
+
+# 右边的图：用log scale画Grad_norm
+data_from_epoch_30 = data[data['Epoch'] >= 30]  # 过滤出Epoch >= 30的数据
+ax2.plot(data_from_epoch_30['Epoch'], data_from_epoch_30['Grad_norm'], label='Grad_norm', color='red')
+ax2.set_yscale('log')  # 设置y轴为对数刻度
+ax2.set_title('Grad_norm vs Epoch (Log Scale)')
+ax2.set_xlabel('Epoch')
+ax2.set_ylabel('Grad_norm (log scale)')
+ax2.legend()
+
+# 调整布局
+plt.tight_layout()
+
+# 保存图表
+output_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/image/lr=1e-1,bs=128,单卡_loss_grad_norm_subplot_logscale.png'
+plt.savefig(output_path)
+
+# 显示图表
 plt.show()
