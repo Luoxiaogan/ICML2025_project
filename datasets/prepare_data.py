@@ -55,7 +55,7 @@ cifar10_transform_test = transforms.Compose(
 
 def get_dataloaders(
     n: int, dataset_name: str, batch_size: int, repeat: int = 1
-) -> Tuple[List[torch.utils.data.DataLoader], torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+) -> Tuple[List[torch.utils.data.DataLoader], torch.utils.data.DataLoader, torch.utils.data.DataLoader, torch.utils.data.Dataset]:
     seed = 42
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -149,4 +149,4 @@ def get_dataloaders(
         generator=generator,
     )
 
-    return trainloader_list, testloader, full_trainloader
+    return trainloader_list, testloader, full_trainloader, trainset

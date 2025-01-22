@@ -1,4 +1,4 @@
-# training/linear_speedup_train_loop.py
+# training/special_train_loop.py
 
 import torch
 import os
@@ -8,11 +8,10 @@ from datasets.prepare_data import get_dataloaders
 from utils.train_utils import get_first_batch
 from training.optimizer import PullDiag_GT, PullDiag_GD
 from models.cnn import new_ResNet18
-from models.fully_connected import FullyConnectedMNIST, two_layer_fc
+from models.fully_connected import FullyConnectedMNIST, SimpleFCN
 from tqdm import tqdm
 from datetime import datetime
 from typing import Tuple
-
 from torch.cuda.amp import autocast
 
 def new_compute_loss_and_accuracy(
@@ -118,7 +117,8 @@ def new_compute_full_gradient_norm(model, train_dataset, criterion, batch_size=N
     return total_norm_sq ** 0.5
 
 
-def train_per_iteration(
+
+def special_train(
     algorithm: str,
     lr: float,  
     A: torch.Tensor,  
@@ -128,8 +128,7 @@ def train_per_iteration(
     remark: str = "",
 )-> pd.DataFrame:
     """
-    执行逻辑和train函数相同, 只是在每个batch执行结束之后都计算一次avaerage loss
-    即输出的变量是per_iteration记录的, 而不是每个epoch记录的
+    执行训练过程。
 
     Args:
         algorithm (str): 算法名称 ('PullDiag_GT' 或 'PullDiag_GD')
@@ -142,10 +141,6 @@ def train_per_iteration(
         remark (str): 备注
     """
 
-    print("每个节点分配到的图片数目是",50000//A.shape[0])
-    today_date = datetime.now().strftime("%Y-%m-%d")
-    
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     criterion = nn.CrossEntropyLoss()
     n = A.shape[0]
@@ -154,21 +149,18 @@ def train_per_iteration(
     if dataset_name == "CIFAR10":
         model_list = [new_ResNet18().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader, trainset = get_dataloaders(
-            n, dataset_name, batch_size
+            n, dataset_name, batch_size, repeat=1
         )
         model_class = new_ResNet18
         output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10"
     elif dataset_name == "MNIST":
-        model_list = [FullyConnectedMNIST().to(device) for _ in range(n)]
+        model_list = [SimpleFCN().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader, trainset = get_dataloaders(
-            n, dataset_name, batch_size
+            n, dataset_name, batch_size, repeat=1
         )
-        model_class = FullyConnectedMNIST
+        model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/linear_speedup/csv"
-    
-    batches_per_epoch = len(trainloader_list[0])
-    print("每个epoch执行的iteration次数是", batches_per_epoch)
+        output_root = "/root/GanLuo/ICML2025_project/outputs/linear_speedup/test_for_best_lr"
     
     torch.backends.cudnn.benchmark = True
 
@@ -202,17 +194,11 @@ def train_per_iteration(
     
     print("optimizer初始化成功!")
 
-    epoch_list = []
-    batch_list = []
-    iteration_list = []
     grad_norm_history = []
 
     progress_bar = tqdm(range(num_epochs), desc="Training Progress")
 
-    total_iterations = 0
-
     for epoch in progress_bar:
-        #train_loss = 0.0
 
         for batch_idx, batch in enumerate(zip(*trainloader_list)):
             inputs = [
@@ -224,34 +210,27 @@ def train_per_iteration(
             h_data_train = inputs  # [tensor.to(device) for tensor in inputs]
             y_data_train = labels  # [tensor.to(device) for tensor in labels]
             optimizer.step(closure=closure, lr=lr)
-            # 这里每个batch结束后都记录一次loss
-        #train_loss = train_loss / len(trainloader_list[0])
-        #train_loss_history.append(train_loss)
 
-            global_gradient_norm = new_compute_loss_and_accuracy(
+        global_gradient_norm = new_compute_loss_and_accuracy(
             model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader, train_dataset=trainset
         )
+        grad_norm_history.append(global_gradient_norm)
 
-            total_iterations += 1
-            epoch_list.append(epoch + 1)
-            batch_list.append(batch_idx + 1)
-            iteration_list.append(total_iterations)
-            grad_norm_history.append(global_gradient_norm)
-            # 这里每个batch结束后都计算一次average loss, 先看看会不会让计算明显变慢吧
+        progress_bar.set_postfix(
+            epoch=epoch + 1,
+            grad_norm=f"{global_gradient_norm}",
+        )
 
-            df = pd.DataFrame({
-                        "epoch": epoch_list,
-                        "batch": batch_list,
-                        "iteration": iteration_list,
-                        "global_gradient_norm(average)": grad_norm_history,
-                    })
-            csv_filename = f"{remark}_{algorithm}_lr={lr}_n={n}_bs={batch_size}_{today_date}.csv".replace(" ", "_")
-            csv_path = os.path.join(output_root, csv_filename)
-            df.to_csv(csv_path, index=False)
+        today_date = datetime.now().strftime("%Y-%m-%d")
+        
+        # 在每个 epoch 结束后保存数据到 CSV
+        df = pd.DataFrame({
+            "epoch": range(1, epoch + 2),  # epoch 从 1 开始
+            "global_gradient_norm(average)": grad_norm_history,
+        })
+        csv_filename = f"只含grad_norm, {remark}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
+        #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
+        csv_path = os.path.join(output_root, csv_filename)
+        df.to_csv(csv_path, index=False)
 
-            progress_bar.set_postfix(
-                epoch=epoch + 1,
-                batch=batch_idx + 1,
-                grad_norm=f"{global_gradient_norm}",
-            )
     return df
