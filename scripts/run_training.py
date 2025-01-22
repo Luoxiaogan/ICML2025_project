@@ -15,14 +15,14 @@ from utils import ring1, ring2, ring3, ring4, show_row
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-n=40
+n=35
 
 import numpy as np
 A = np.full((n, n), 1/n)
 
 train_per_iteration(
     algorithm="PullDiag_GT",
-    lr=5e-1,
+    lr=1e-1,
     A=A,
     dataset_name="MNIST",
     batch_size=128,

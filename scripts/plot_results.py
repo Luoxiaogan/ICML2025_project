@@ -44,130 +44,36 @@ plt.show() """
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import re
+
+# 读取CSV文件路径
+csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/csv/special_train,_在整个训练集上计算grad_norm_PullDiag_GT_lr=0.5_n=40_bs=128_2025-01-23.csv'
+
+# 从文件名中提取 lr, n, bs 的值
+filename = csv_path.split('/')[-1]
+lr = re.search(r'lr=([\d.]+)', filename).group(1)
+n = re.search(r'n=(\d+)', filename).group(1)
+bs = re.search(r'bs=(\d+)', filename).group(1)
 
 # 读取CSV文件
-csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/单一节点训练_计算grad需要在整个trainset上采样/lr=0.1, bs=128.csv'
 data = pd.read_csv(csv_path)
 
 # 创建画布和子图
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))  # 1行2列的子图布局
+fig, ax = plt.subplots(figsize=(8, 6))  # 单个图
 
-# 左边的图：用log scale画Loss
-ax1.plot(data['Epoch'], data['Loss'], label='Loss', color='blue')
-ax1.set_yscale('log')  # 设置y轴为对数刻度
-ax1.set_title('Loss, lr=0.1, bs=128, n=1')
-ax1.set_xlabel('Epoch')
-ax1.set_ylabel('Loss (log scale)')
-ax1.legend()
-
-# 右边的图：用log scale画Grad_norm
-ax2.plot(data['Epoch'], data['Grad_norm'], label='Grad_norm', color='red')
-ax2.set_yscale('log')  # 设置y轴为对数刻度
-ax2.set_title('Grad_norm, lr=0.1, bs=128, n=1')
-ax2.set_xlabel('Epoch')
-ax2.set_ylabel('Grad_norm (log scale)')
-ax2.legend()
+# 画图：用log scale画global_gradient_norm(average)
+ax.plot(data['iteration'], data['global_gradient_norm(average)'], label='Gradient Norm', color='blue')
+ax.set_yscale('log')  # 设置y轴为对数刻度
+ax.set_title(f'lr={lr}, n={n}, bs={bs}')  # 设置标题为 lr, n, bs 的值
+ax.set_xlabel('Iteration')
+ax.set_ylabel('Global Gradient Norm (log scale)')
+ax.legend()
 
 # 调整布局
 plt.tight_layout()
 
 # 保存图表
-output_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/image/在整体的训练集上采样计算梯度, lr=0.1,bs=128.png'
-plt.savefig(output_path)
-
-# 显示图表
-plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-# 读取CSV文件
-csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/单一节点训练_计算grad需要在整个trainset上采样/lr=0.1, bs=512.csv'
-data = pd.read_csv(csv_path)
-
-# 创建画布和子图
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))  # 1行2列的子图布局
-
-# 左边的图：用log scale画Loss
-ax1.plot(data['Epoch'], data['Loss'], label='Loss', color='blue')
-ax1.set_yscale('log')  # 设置y轴为对数刻度
-ax1.set_title('Loss, lr=0.1, bs=512, n=1')
-ax1.set_xlabel('Epoch')
-ax1.set_ylabel('Loss (log scale)')
-ax1.legend()
-
-# 右边的图：用log scale画Grad_norm
-ax2.plot(data['Epoch'], data['Grad_norm'], label='Grad_norm', color='red')
-ax2.set_yscale('log')  # 设置y轴为对数刻度
-ax2.set_title('Grad_norm,lr=0.1, bs=512, n=1')
-ax2.set_xlabel('Epoch')
-ax2.set_ylabel('Grad_norm (log scale)')
-ax2.legend()
-
-# 调整布局
-plt.tight_layout()
-
-# 保存图表
-output_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/image/在整体的训练集上采样计算梯度, lr=0.1,bs=512.png'
-plt.savefig(output_path)
-
-# 显示图表
-plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 读取CSV文件
-csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/单一节点训练_计算grad需要在整个trainset上采样/lr=0.1, bs=512.csv'
-data = pd.read_csv(csv_path)
-
-# 创建画布和子图
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))  # 1行2列的子图布局
-
-# 左边的图：用log scale画Loss
-ax1.plot(data['Epoch'], data['Loss'], label='Loss', color='blue')
-ax1.set_yscale('log')  # 设置y轴为对数刻度
-ax1.set_title('Loss, lr=0.1, bs=512, n=1')
-ax1.set_xlabel('Epoch')
-ax1.set_ylabel('Loss (log scale)')
-ax1.legend()
-
-# 右边的图：用log scale画Grad_norm
-ax2.plot(data['Epoch'], data['Grad_norm'], label='Grad_norm', color='red')
-ax2.set_yscale('log')  # 设置y轴为对数刻度
-ax2.set_title('Grad_norm,lr=0.1, bs=512, n=1')
-ax2.set_xlabel('Epoch')
-ax2.set_ylabel('Grad_norm (log scale)')
-ax2.legend()
-
-# 调整布局
-plt.tight_layout()
-
-# 保存图表
-output_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/image/在整体的训练集上采样计算梯度, lr=0.1,bs=512.png'
+output_path = f'/root/GanLuo/ICML2025_project/outputs/linear_speedup/image/从整体训练集_分布式, lr={lr},n={n},bs={bs}.png'
 plt.savefig(output_path)
 
 # 显示图表
