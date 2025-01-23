@@ -47,7 +47,7 @@ import matplotlib.pyplot as plt
 import re
 
 # 读取CSV文件路径
-csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/csv/special_train,_在整个训练集上计算grad_norm_PullDiag_GT_lr=0.5_n=40_bs=128_2025-01-23.csv'
+csv_path = '/root/GanLuo/ICML2025_project/outputs/linear_speedup/csv/special_train,_在整个训练集上计算grad_norm_PullDiag_GT_lr=0.5_n=5_bs=128_2025-01-23.csv'
 
 # 从文件名中提取 lr, n, bs 的值
 filename = csv_path.split('/')[-1]
