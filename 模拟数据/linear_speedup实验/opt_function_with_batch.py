@@ -135,8 +135,6 @@ def PullDiag_GD_with_batch(
 
     # 记录训练过程
     gradient_history_onfull = []
-    gradient_history = []
-    x_history = []
 
     for _ in range(max_it):
         W = A @ W
@@ -158,14 +156,10 @@ def PullDiag_GD_with_batch(
         # 在整个训练数据集上计算梯度
         mean_grad = np.mean(_grad, axis=0, keepdims=True)
         gradient_history_onfull.append(np.linalg.norm(mean_grad))
-        x_history.append(np.linalg.norm(x_mean))
-        gradient_history.append(np.linalg.norm(np.mean(g, axis=0)))
 
     return pd.DataFrame(
         {
             "gradient_norm_on_full_trainset": gradient_history_onfull,
-            "x_mean_norm": x_history,
-            "gradient_norm_on_batch": gradient_history,
         }
     )
 
@@ -211,7 +205,8 @@ def PullDiag_GT_with_batch(
         # 更新权重矩阵和参数
         W = A @ W
         x_tmp = x - lr * v
-        x = A @ x - x_tmp  # 注意A在外面
+        x = A @ x_tmp  # 注意A在外面
+        #x = A @ x - lr * v
 
         # 计算梯度（使用批次）
         g = grad_func(x, y, h, rho=rho, batch_size=batch_size).reshape(
@@ -222,6 +217,7 @@ def PullDiag_GT_with_batch(
         Diag_W_inv = np.diag(1 / np.diag(W))
         tmp = v + Diag_W_inv @ g - w
         v = A @ tmp  # 注意A在外面
+        #v = A @ v + Diag_W_inv @ g - w
         w = Diag_W_inv @ g  # 下一步的 w
 
         # 记录状态

@@ -5,7 +5,7 @@ import os
 import torch.nn as nn
 import pandas as pd
 from datasets.prepare_data import get_dataloaders
-from utils.train_utils import get_first_batch, compute_loss_and_accuracy, compute_full_gradient_norm
+from utils.train_utils import get_first_batch, compute_loss_and_accuracy
 from training.optimizer import PullDiag_GT, PullDiag_GD
 from models.cnn import new_ResNet18
 from models.fully_connected import FullyConnectedMNIST, SimpleFCN
@@ -42,14 +42,14 @@ def train(
 
     if dataset_name == "CIFAR10":
         model_list = [new_ResNet18().to(device) for _ in range(n)]
-        trainloader_list, testloader, full_trainloader, trainset = get_dataloaders(
+        trainloader_list, testloader, full_trainloader = get_dataloaders(
             n, dataset_name, batch_size, repeat=1
         )
         model_class = new_ResNet18
         output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10"
     elif dataset_name == "MNIST":
         model_list = [SimpleFCN().to(device) for _ in range(n)]
-        trainloader_list, testloader, full_trainloader, trainset = get_dataloaders(
+        trainloader_list, testloader, full_trainloader = get_dataloaders(
             n, dataset_name, batch_size, repeat=1
         )
         model_class = SimpleFCN
@@ -115,7 +115,7 @@ def train(
         train_loss_history.append(train_loss)
 
         train_average_loss, train_accuracy, test_average_loss, test_accuracy, global_gradient_norm = compute_loss_and_accuracy(
-            model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader, train_dataset=trainset
+            model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader
         )
         train_average_loss_history.append(train_average_loss)
         train_average_accuracy_history.append(train_accuracy)

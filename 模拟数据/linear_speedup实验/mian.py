@@ -5,21 +5,21 @@ from copy import deepcopy
 from useful_functions_with_batch import *
 from opt_function_with_batch import *
 from network_utils import *
+import matplotlib.pyplot as plt
 
-# 初始化全局数据
-d = 10
-L_total = 204800
+d=10
+L_total=8000
 h_global, y_global, x_opt = init_global_data(d=d, L_total=L_total, seed=42)
 
 # 设置参数
-n = 512
-lr=1e-4
+n = 16
+lr=1.22e-4
 
 
 h_tilde, y_tilde = distribute_data(h=h_global, y=y_global, n=n)
 x_star = generate_x_star(n=n, d=d, x_opt=x_opt, sigma_h=10)
 init_x = init_x_func(n=n, d=d, seed=42)
-A = generate_exponential_weight_matrix(n=n)
+A,B= ring1(n)
 print("h_tilde:", h_tilde.shape, "\n")
 
 # 初始化列表，用于存储每次的结果
@@ -39,7 +39,7 @@ for i in range(20):
         rho=1e-2,
         lr=lr,
         sigma_n=0,
-        max_it=6000,
+        max_it=100000,
         batch_size=200
     )
     
@@ -57,6 +57,6 @@ average_gradient_norm = np.mean(gradient_norms_array, axis=0)
 df = pd.DataFrame(average_gradient_norm, columns=["average_gradient_norm"])
 
 # 保存为 CSV 文件
-df.to_csv(f"/root/GanLuo/ICML2025_project/模拟数据/linear_speedup实验/output/GT_指数图,重复20次,lr={lr},n={n}.csv", index=False)
+df.to_csv(f"/root/GanLuo/ICML2025_project/模拟数据/linear_speedup实验/output/GT_环状图,重复20次,lr={lr},n={n}.csv", index=False)
 
 print("average_gradient_norm 已保存为 average_gradient_norm.csv")

@@ -9,23 +9,26 @@ project_root = os.path.abspath(os.path.join(current_dir, '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from training import train, train_per_iteration, special_train
+from training import train, train_per_iteration
 import torch
-from utils import ring1, ring2, ring3, ring4, show_row
+from utils import ring1, show_row 
+import numpy as np
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-n=35
-
-import numpy as np
-A = np.full((n, n), 1/n)
+n=16
+A, B = ring1(n=n)
+k = 20
+A = np.linalg.matrix_power(A, k)
+show_row(A)
+print(A.shape)
 
 train_per_iteration(
     algorithm="PullDiag_GT",
-    lr=1e-1,
+    lr=5e-3,
     A=A,
     dataset_name="MNIST",
     batch_size=128,
-    num_epochs=600,
-    remark="special_train, 在整个训练集上计算grad_norm",
+    num_epochs=10,
+    remark=f"MG={k}, ring1",
 )
