@@ -51,7 +51,7 @@ def train_per_iteration(
             n, dataset_name, batch_size
         )
         model_class = new_ResNet18
-        output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10"
+        output_root = "/root/GanLuo/ICML2025_project/outputs/CIFAR10_MG"
     elif dataset_name == "MNIST":
         model_list = [FullyConnectedMNIST().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(
