@@ -79,17 +79,17 @@ seed_value = 42
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 n=16
 A = generate_row_stochastic_matrix(seed_value, G)
-k = 10
+k = 25
 A = np.linalg.matrix_power(A, k)
 show_row(A)
 print(A.shape)
 
-train_per_iteration(
+train(
     algorithm="PullDiag_GT",
-    lr=2e-2,
+    lr=7e-2,
     A=A,
-    dataset_name="MNIST",
+    dataset_name="CIFAR10",
     batch_size=128,
-    num_epochs=10,
+    num_epochs=100,
     remark=f"MG={k}, 临近图16",
 )
