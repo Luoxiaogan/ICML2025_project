@@ -38,3 +38,6 @@ training/__pycache__/optimizer.cpython-312.pyc
 training/__pycache__/training_loop.cpython-312.pyc
 模拟数据/linear_speedup实验/__pycache__/network_utils.cpython-312.pyc
 模拟数据/linear_speedup实验/__pycache__/opt_function_with_batch.cpython-312.pyc
+
+
+**/.DS_Store
