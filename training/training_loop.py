@@ -7,7 +7,7 @@ import pandas as pd
 from datasets.prepare_data import get_dataloaders
 from utils.train_utils import get_first_batch, compute_loss_and_accuracy
 from utils.train_utils import simple_compute_loss_and_accuracy
-from training.optimizer import PullDiag_GT, PullDiag_GD
+from training.optimizer import PullDiag_GT, PullDiag_GD, PushPull
 from models.cnn import new_ResNet18
 from models.fully_connected import FullyConnectedMNIST, SimpleFCN
 from tqdm import tqdm
@@ -16,7 +16,8 @@ from datetime import datetime
 def train(
     algorithm: str,
     lr: float,  
-    A: torch.Tensor,  
+    A: torch.Tensor,
+    B: torch.Tensor,
     dataset_name: str,
     batch_size: int,
     num_epochs: int = 10,
@@ -26,10 +27,11 @@ def train(
     执行训练过程。
 
     Args:
-        algorithm (str): 算法名称 ('PullDiag_GT' 或 'PullDiag_GD')
+        algorithm (str): 算法名称 ('PullDiag_GT' 或 'PullDiag_GD' 或 "PushPull")
         lr (float): 学习率
         model_list (list): 模型列表
         A (torch.Tensor): 混合矩阵
+        B (torch.Tensor): 混合矩阵
         dataloaders (list): 训练数据加载器列表
         test_dataloader (DataLoader): 测试数据加载器
         num_epochs (int): 训练轮数
@@ -40,6 +42,7 @@ def train(
     criterion = nn.CrossEntropyLoss()
     n = A.shape[0]
     A = torch.from_numpy(A).float().to(device)
+    B = torch.from_numpy(B).float().to(device)
 
     if dataset_name == "CIFAR10":
         model_list = [new_ResNet18().to(device) for _ in range(n)]
@@ -48,7 +51,7 @@ def train(
         )
         model_class = new_ResNet18
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_Multi_Gossip"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_MG_for_draw"
+        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_output/CIFAR"
     elif dataset_name == "MNIST":
         model_list = [SimpleFCN().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(
@@ -56,7 +59,7 @@ def train(
         )
         model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/linear_speedup/test_for_best_lr"
+        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_output/MNIST"
     
     torch.backends.cudnn.benchmark = True
 
@@ -85,6 +88,8 @@ def train(
         optimizer = PullDiag_GT(model_list, lr=lr, A=A, closure=closure)
     elif algorithm == "PullDiag_GD":
         optimizer = PullDiag_GD(model_list, lr=lr, A=A, closure=closure)
+    elif algorithm == "PushPull":
+        optimizer = PushPull(model_list, lr=lr, A=A, B=B, closure=closure)
     else:   
         raise ValueError(f"Unsupported algorithm: {algorithm}")
     
