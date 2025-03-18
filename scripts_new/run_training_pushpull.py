@@ -22,7 +22,7 @@ from network_utils import get_matrixs_from_exp_graph
 import numpy as np
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-n=16
+n=32
 #A, B = ring1(n)
 #A = generate_row_stochastic_matrix_with_self_loops(seed=48)
 A, B = get_matrixs_from_exp_graph(n = n, seed=48)
