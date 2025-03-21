@@ -447,3 +447,54 @@ def get_matrixs_from_exp_graph(n, seed=42):
     B = Col(M)
     
     return A, B
+
+import numpy as np
+
+def get_matrixs_from_grid_graph(r, c, seed=42):
+    """
+    生成一个 r × c 的网格图(grid graph)并返回对应的行随机和列随机矩阵。
+    
+    参数:
+    r (int): 网格图的行数
+    c (int): 网格图的列数，总节点数为 r * c
+    seed (int): 随机数生成种子
+    
+    返回:
+    tuple: (A, B) - A为行随机矩阵，B为列随机矩阵
+    """
+    n = r * c  # 总节点数
+    
+    # 初始化邻接矩阵，全部为0
+    S = np.zeros((n, n))
+    
+    # 在网格图中，每个节点最多有四个邻居(上、下、左、右)和一个自环
+    for i in range(n):
+        row, col = i // c, i % c
+        
+        # 添加自环
+        S[i, i] = 1
+        
+        # 添加向右的边（如果不在最右列）
+        if col < c - 1:
+            right_neighbor = i + 1
+            S[i, right_neighbor] = 1
+            S[right_neighbor, i] = 1  # 无向图，添加对称边
+            
+        # 添加向下的边（如果不在最底行）
+        if row < r - 1:
+            down_neighbor = i + c
+            S[i, down_neighbor] = 1
+            S[down_neighbor, i] = 1  # 无向图，添加对称边
+    
+    # 将非零元素替换为随机的1-9整数值
+    np.random.seed(seed)
+    S = np.where(S != 0, np.random.randint(1, 10, size=S.shape), 0)
+    
+    # 转换为浮点数
+    S = S.astype(float)
+    
+    # 使用Row和Col函数归一化得到行随机和列随机矩阵
+    A = Row(S)
+    B = Col(S)
+    
+    return A, B
