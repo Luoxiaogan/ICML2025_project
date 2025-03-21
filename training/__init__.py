@@ -4,6 +4,7 @@ from .optimizer import PullDiag_GT, PullDiag_GD, PushPull
 from .training_loop import train
 from .linear_speedup_train_loop import train_per_iteration
 from .special_train_loop import special_train
+from .train_just_per_batch_loss import train_just_per_batch_loss
 
 __all__ = [
     'PullDiag_GT',
@@ -12,4 +13,5 @@ __all__ = [
     'train',
     'train_per_iteration',
     'special_train',
+    'train_just_per_batch_loss',
 ]
