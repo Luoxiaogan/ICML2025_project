@@ -96,7 +96,7 @@ def train_track_grad_norm(
         )
         model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_track_grad_norm/output"
+        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_track_grad_norm/out"
     
     torch.backends.cudnn.benchmark = True
 

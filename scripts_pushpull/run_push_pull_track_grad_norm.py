@@ -23,21 +23,85 @@ import numpy as np
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
+lr = 1e-2
+num_epochs = 50
+bs = 128
 
-n=20
+
+n=4
 A, B = get_matrixs_from_exp_graph(n = n, seed=48)
 show_row(A)
 print(A.shape)
 train_track_grad_norm(
     algorithm="PushPull",
-    lr=1e-3,
+    lr=lr,
     A=A,
     B=B,
     dataset_name="MNIST",
-    batch_size=128,
-    num_epochs=10,
+    batch_size=bs,
+    num_epochs=50,
     remark=f"Exp_test",
 )
+
+n=8
+A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+show_row(A)
+print(A.shape)
+train_track_grad_norm(
+    algorithm="PushPull",
+    lr=lr,
+    A=A,
+    B=B,
+    dataset_name="MNIST",
+    batch_size=bs,
+    num_epochs=100,
+    remark=f"Exp_test",
+)
+
+n=16
+A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+show_row(A)
+print(A.shape)
+train_track_grad_norm(
+    algorithm="PushPull",
+    lr=lr,
+    A=A,
+    B=B,
+    dataset_name="MNIST",
+    batch_size=bs,
+    num_epochs=200,
+    remark=f"Exp_test",
+)
+
+n=32
+A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+show_row(A)
+print(A.shape)
+train_track_grad_norm(
+    algorithm="PushPull",
+    lr=lr,
+    A=A,
+    B=B,
+    dataset_name="MNIST",
+    batch_size=bs,
+    num_epochs=400,
+    remark=f"Exp_test",
+)
+
+# n=64
+# A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm(
+#     algorithm="PushPull",
+#     lr=5e-2,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=500,
+#     remark=f"Exp_test",
+# )
 
 # n=4
 # A, B = get_matrixs_from_exp_graph(n = n, seed=48)
