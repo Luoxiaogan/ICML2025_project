@@ -51,7 +51,7 @@ def train(
         )
         model_class = new_ResNet18
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_Multi_Gossip"
-        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_output/CIFAR"
+        output_root = "/root/GanLuo/ICML2025_project/outputs/CIFAR_MG_RING"
     elif dataset_name == "MNIST":
         model_list = [SimpleFCN().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(

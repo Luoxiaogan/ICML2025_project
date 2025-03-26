@@ -79,7 +79,7 @@ def row_and_col_mat(
     return A.T, B.T  # A.T是行随机，B.T是列随机矩阵，
 
 
-def ring1(n=10):  # 生成稀疏环状图。也可以取n=5
+def ring1(n=16):  # 生成稀疏环状图。也可以取n=5
     A, B = np.eye(n) / 2, np.eye(n) / 2
     m = int(n / 2)
     for i in range(n - 1):
