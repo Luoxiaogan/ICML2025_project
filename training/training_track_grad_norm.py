@@ -88,15 +88,15 @@ def train_track_grad_norm(
         )
         model_class = new_ResNet18
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_Multi_Gossip"
-        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_output/CIFAR"
+        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_track_grad_norm/cifar10"
     elif dataset_name == "MNIST":
-        model_list = [SimpleFCN().to(device) for _ in range(n)]
+        model_list = [FullyConnectedMNIST().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(
             n, dataset_name, batch_size, repeat=1
         )
-        model_class = SimpleFCN
+        model_class = FullyConnectedMNIST
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_track_grad_norm/out"
+        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_track_grad_norm/four_layer"
     
     torch.backends.cudnn.benchmark = True
 
