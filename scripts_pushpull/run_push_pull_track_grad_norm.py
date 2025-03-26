@@ -28,50 +28,50 @@ num_epochs = 50
 bs = 128
 
 
-n=4
-A, B = get_matrixs_from_exp_graph(n = n, seed=48)
-show_row(A)
-print(A.shape)
-train_track_grad_norm(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=50,
-    remark=f"Exp_test",
-)
+# n=4
+# A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=50,
+#     remark=f"Exp_test",
+# )
 
-n=8
-A, B = get_matrixs_from_exp_graph(n = n, seed=48)
-show_row(A)
-print(A.shape)
-train_track_grad_norm(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=100,
-    remark=f"Exp_test",
-)
+# n=8
+# A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=100,
+#     remark=f"Exp_test",
+# )
 
-n=16
-A, B = get_matrixs_from_exp_graph(n = n, seed=48)
-show_row(A)
-print(A.shape)
-train_track_grad_norm(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=200,
-    remark=f"Exp_test",
-)
+# n=16
+# A, B = get_matrixs_from_exp_graph(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=200,
+#     remark=f"Exp_test",
+# )
 
 n=32
 A, B = get_matrixs_from_exp_graph(n = n, seed=48)
