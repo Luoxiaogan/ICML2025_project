@@ -51,7 +51,7 @@ def train_high_hetero(
         )
         model_class = new_ResNet18
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_Multi_Gossip"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/CIFAR_MG_RING"
+        output_root = "./ICML2025_project/outputs/CIFAR_MG_RING"
     elif dataset_name == "MNIST":
         model_list = [SimpleFCN().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders_high_hetero(
@@ -59,7 +59,7 @@ def train_high_hetero(
         )
         model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_output/MNIST"
+        output_root = "./ICML2025_project/outputs/MNIST_MG_high_hetero"
     
     torch.backends.cudnn.benchmark = True
 

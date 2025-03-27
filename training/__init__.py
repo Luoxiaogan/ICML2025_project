@@ -7,6 +7,7 @@ from .special_train_loop import special_train
 from .train_just_per_batch_loss import train_just_per_batch_loss
 from .optimizer_push_pull_grad_norm_track import PushPull_grad_norm_track
 from .training_track_grad_norm import train_track_grad_norm
+from .train_loop_high_hetro import train_high_hetero
 
 __all__ = [
     'PullDiag_GT',
@@ -18,4 +19,5 @@ __all__ = [
     'train_just_per_batch_loss',
     'PushPull_grad_norm_track',
     'train_track_grad_norm',
+    'train_high_hetero',
 ]
