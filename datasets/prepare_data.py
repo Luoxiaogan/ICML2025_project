@@ -185,13 +185,13 @@ def get_dataloaders_high_hetero(
     elif dataset_name == "MNIST":
         transform_train, transform_test = MNIST_transform_train, MNIST_transform_test
         trainset = torchvision.datasets.MNIST(
-            root="/root/GanLuo/ICML2025_project/data/raw/MNIST",
+            root="/Users/luogan/Code/ICML2025_project/data/raw/MNIST",
             train=True,
             download=False,
             transform=transform_train,
         )
         testset = torchvision.datasets.MNIST(
-            root="/root/GanLuo/ICML2025_project/data/raw/MNIST",
+            root="/Users/luogan/Code/ICML2025_project/data/raw/MNIST",
             train=False,
             download=False,
             transform=transform_test,
