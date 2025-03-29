@@ -59,7 +59,7 @@ def train_high_hetero(
         )
         model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "./ICML2025_project/outputs/MNIST_MG_high_hetero"
+        output_root = "/root/ICML2025_project/outputs/MNIST_MG_high_hetero"
     
     torch.backends.cudnn.benchmark = True
 
