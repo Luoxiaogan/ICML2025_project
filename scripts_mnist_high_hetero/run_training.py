@@ -138,5 +138,5 @@ for lr in lr_list:
 os.chdir("/root/GanLuo/ICML2025_project")
 os.system("source /etc/network_turbo")
 os.system("git add .")
-os.system('git commit -m "add all this"')
+os.system('git commit -m "add all this!!!!!"')
 os.system("git push")
