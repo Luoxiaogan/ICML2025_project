@@ -59,7 +59,7 @@ def train(
         )
         model_class = SimpleFCN
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-        output_root = "/root/GanLuo/ICML2025_project/PUSHPULL_PROJECT/real_data_output/MNIST"
+        output_root = "/root/GanLuo/ICML2025_project/outputs/MNIST_on_high_kappa"
     
     torch.backends.cudnn.benchmark = True
 
