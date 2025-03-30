@@ -20,7 +20,7 @@ from network_utils import generate_geometric_graph, generate_nearest_nightbor_gr
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 n=16
-A,B = generate_nearest_nightbor_graph()
+A,B = grid_16()
 k = 1
 A = np.linalg.matrix_power(A, k)
 show_row(A)
@@ -32,11 +32,11 @@ lr_list = [1e-2, 2e-2, 3e-2, 9e-3]
 
 train_high_hetero(
     algorithm="PullDiag_GT",
-    lr=4e-1,
+    lr=7e-2,
     A=A,
     B=B,# 实际没用用到
     dataset_name="MNIST",
     batch_size=128,
     num_epochs=400,
-    remark=f"MG={k}, 几何图 16, HIGH HETERO",
+    remark=f"MG={k}, Grid图 16, HIGH HETERO",
 )
