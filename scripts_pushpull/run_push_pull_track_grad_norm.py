@@ -85,7 +85,7 @@ train_track_grad_norm(
     dataset_name="MNIST",
     batch_size=bs,
     num_epochs=400,
-    remark=f"Exp_test",
+    remark=f"test_Exp_test",
 )
 
 # n=64
