@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
+import networkx as nx
 
 # @Lg 难点在于训练时间和跑收敛。建议现在先把MNIST的跑起来，然后写CIFAR的代码。如果Cifar-10 实验在10个节点无法收敛，可以考虑构造5个节点的稀疏图比如di_ring(n=5)和 Row(get_xinmeng_matrix(n=5))
 # 一、 4层神经网络训练MNIST数据集：
