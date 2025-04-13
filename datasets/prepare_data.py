@@ -151,6 +151,106 @@ def get_dataloaders(
 
     return trainloader_list, testloader, full_trainloader
 
+def get_dataloaders_fixed_batch(
+    n: int, dataset_name: str, batch_size: int, repeat: int = 1
+) -> Tuple[List[torch.utils.data.DataLoader], torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    if dataset_name == "CIFAR10":
+        transform_train, transform_test = (
+            cifar10_transform_train,
+            cifar10_transform_test,
+        )
+        trainset = torchvision.datasets.CIFAR10(
+            root="/home/lg/ICML2025_project/data/raw/CIFAR10",
+            train=True,
+            download=False,
+            transform=transform_train,
+        )
+        testset = torchvision.datasets.CIFAR10(
+            root="/home/lg/ICML2025_project/data/raw/CIFAR10",
+            train=False,
+            download=False,
+            transform=transform_test,
+        )
+    elif dataset_name == "MNIST":
+        transform_train, transform_test = MNIST_transform_train, MNIST_transform_test
+        trainset = torchvision.datasets.MNIST(
+            root="/home/lg/ICML2025_project/data/raw/MNIST",
+            train=True,
+            download=False,
+            transform=transform_train,
+        )
+        testset = torchvision.datasets.MNIST(
+            root="/home/lg/ICML2025_project/data/raw/MNIST",
+            train=False,
+            download=False,
+            transform=transform_test,
+        )
+    else:
+        raise ValueError(f"Unsupported dataset: {dataset_name}")
+
+    # Save the original trainset for full_trainloader
+    original_trainset = trainset
+
+    # Repeat the training dataset if repeat > 1
+    if repeat > 1:
+        trainset = torch.utils.data.ConcatDataset([trainset] * repeat)
+
+    total_train_size = len(trainset)
+    subset_sizes = [
+        total_train_size // n + (1 if i < total_train_size % n else 0) for i in range(n)
+    ]
+
+    subsets = torch.utils.data.random_split(trainset, subset_sizes, generator=generator)
+
+    trainloader_list = [
+        torch.utils.data.DataLoader(
+            subset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=4,
+            pin_memory=True,
+            prefetch_factor=2,
+            persistent_workers=True,
+            generator=generator,
+            drop_last=True, # 关键在于设置 drop_last=True
+        )
+        for subset in subsets
+    ]
+
+    # Create a DataLoader for the full training set using the original trainset
+    full_trainloader = torch.utils.data.DataLoader(
+        original_trainset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True,
+        generator=generator,
+        drop_last=True, # 为保证一致性，也设置 drop_last=True
+    )
+
+    testloader = torch.utils.data.DataLoader(
+        testset,
+        batch_size=100,
+        shuffle=False,
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True,
+        generator=generator,
+    )
+
+    return trainloader_list, testloader, full_trainloader
+
 
 def get_dataloaders_high_hetero(
     n: int, dataset_name: str, batch_size: int, repeat: int = 1
@@ -268,6 +368,143 @@ def get_dataloaders_high_hetero(
         pin_memory=True,
         prefetch_factor=2,
         persistent_workers=True,
+        generator=generator,
+    )
+
+    # Test set DataLoader
+    testloader = torch.utils.data.DataLoader(
+        testset,
+        batch_size=100,
+        shuffle=False,
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True,
+        generator=generator,
+    )
+
+    return trainloader_list, testloader, full_trainloader
+
+
+def get_dataloaders_high_hetero_fixed_batch(
+    n: int, dataset_name: str, batch_size: int, alpha: float = 0.5, repeat: int = 1
+) -> Tuple[List[torch.utils.data.DataLoader], torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    # Load dataset
+    if dataset_name == "CIFAR10":
+        transform_train, transform_test = (
+            cifar10_transform_train,
+            cifar10_transform_test,
+        )
+        trainset = torchvision.datasets.CIFAR10(
+            root="/home/lg/ICML2025_project/data/raw/CIFAR10",
+            train=True,
+            download=False,
+            transform=transform_train,
+        )
+        testset = torchvision.datasets.CIFAR10(
+            root="/home/lg/ICML2025_project/data/raw/CIFAR10",
+            train=False,
+            download=False,
+            transform=transform_test,
+        )
+        num_classes = 10
+    elif dataset_name == "MNIST":
+        transform_train, transform_test = MNIST_transform_train, MNIST_transform_test
+        trainset = torchvision.datasets.MNIST(
+            root="/home/lg/ICML2025_project/data/raw/MNIST",
+            train=True,
+            download=False,
+            transform=transform_train,
+        )
+        testset = torchvision.datasets.MNIST(
+            root="/home/lg/ICML2025_project/data/raw/MNIST",
+            train=False,
+            download=False,
+            transform=transform_test,
+        )
+        num_classes = 10
+    else:
+        raise ValueError(f"Unsupported dataset: {dataset_name}")
+
+    # Save original trainset for full_trainloader
+    original_trainset = trainset
+
+    # Repeat the training dataset if repeat > 1
+    if repeat > 1:
+        trainset = torch.utils.data.ConcatDataset([trainset] * repeat)
+
+    # Get labels and create class-specific indices
+    labels = np.array(trainset.targets)
+    class_indices = [np.where(labels == i)[0] for i in range(num_classes)]
+
+    # Create heterogeneous distributions for each node
+    subsets = []
+    total_size = len(trainset)
+    base_size = total_size // n
+
+    # Generate Dirichlet distribution for class proportions across nodes
+    class_dist = np.random.dirichlet([alpha] * n, num_classes)
+
+    # Assign samples to each node
+    remaining_indices = list(range(total_size))
+    for node in range(n):
+        node_indices = []
+        node_size = base_size + (1 if node < total_size % n else 0)
+
+        # Calculate target number of samples per class for this node
+        target_dist = class_dist[:, node] * node_size
+
+        available_node_indices = []
+        for cls in range(num_classes):
+            num_samples = int(target_dist[cls])
+            global_available_indices = class_indices[cls]
+            intersected_indices = np.intersect1d(remaining_indices, global_available_indices)
+
+            if len(intersected_indices) > 0:
+                selected = np.random.choice(
+                    intersected_indices,
+                    size=min(num_samples, len(intersected_indices)),
+                    replace=False
+                )
+                node_indices.extend(selected)
+                remaining_indices = list(set(remaining_indices) - set(selected))
+
+        subsets.append(torch.utils.data.Subset(trainset, node_indices))
+
+    # Create DataLoaders for each subset
+    trainloader_list = [
+        torch.utils.data.DataLoader(
+            subset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=4,
+            pin_memory=True,
+            prefetch_factor=2,
+            persistent_workers=True,
+            drop_last=True, # 设置 drop_last=True
+            generator=generator,
+        )
+        for subset in subsets
+    ]
+
+    # Full training set DataLoader
+    full_trainloader = torch.utils.data.DataLoader(
+        original_trainset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=4,
+        pin_memory=True,
+        prefetch_factor=2,
+        persistent_workers=True,
+        drop_last=True, # 为保证一致性，也设置 drop_last=True
         generator=generator,
     )
 
