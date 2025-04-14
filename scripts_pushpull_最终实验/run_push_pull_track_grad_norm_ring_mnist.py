@@ -26,24 +26,24 @@ remark="Grid_异质性",
 device = "cuda:1"
 root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/ring_mnist"
 
-n=4
-A, B = generate_ring_matrices(n = n, seed=42)
-show_row(A)
-print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=300,
-    remark=remark,
-    alpha = alpha,
-    root = root,
-    use_hetero=use_hetero,
-    device=device
-)
+# n=4
+# A, B = generate_ring_matrices(n = n, seed=42)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm_with_hetero(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=300,
+#     remark=remark,
+#     alpha = alpha,
+#     root = root,
+#     use_hetero=use_hetero,
+#     device=device
+# )
 
 n=8
 A, B = generate_ring_matrices(n = n, seed=42)
@@ -56,25 +56,6 @@ train_track_grad_norm_with_hetero(
     B=B,
     dataset_name="MNIST",
     batch_size=bs,
-    num_epochs=600,
-    remark=remark,
-    alpha = alpha,
-    root = root,
-    use_hetero=use_hetero,
-    device=device
-)
-
-n=12
-A, B = generate_ring_matrices(n = n, seed=42)
-show_row(A)
-print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
     num_epochs=1500,
     remark=remark,
     alpha = alpha,
@@ -83,21 +64,40 @@ train_track_grad_norm_with_hetero(
     device=device
 )
 
-n=16
-A, B = generate_ring_matrices(n = n, seed=42)
-show_row(A)
-print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=1500,
-    remark=remark,
-    alpha = alpha,
-    root = root,
-    use_hetero=use_hetero,
-    device=device
-)
+# n=12
+# A, B = generate_ring_matrices(n = n, seed=42)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm_with_hetero(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=1500,
+#     remark=remark,
+#     alpha = alpha,
+#     root = root,
+#     use_hetero=use_hetero,
+#     device=device
+# )
+
+# n=16
+# A, B = generate_ring_matrices(n = n, seed=42)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm_with_hetero(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=1500,
+#     remark=remark,
+#     alpha = alpha,
+#     root = root,
+#     use_hetero=use_hetero,
+#     device=device
+# )
