@@ -22,6 +22,7 @@ bs = 128
 alpha = 0.9
 use_hetero=True
 remark= ""
+seed = 100
 
 n=4
 A, B = generate_grid_matrices(n = n, seed=48)
@@ -34,63 +35,64 @@ train_track_grad_norm_with_hetero(
     B=B,
     dataset_name="MNIST",
     batch_size=bs,
-    num_epochs=200,
-    remark=remark,
+    num_epochs=300,
+    remark="newnewnew ",
     alpha = alpha,
     root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
     use_hetero=use_hetero,
+    seed = 100
 )
 
-n=9
-A, B = generate_grid_matrices(n = n, seed=48)
-show_row(A)
-print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=400,
-    remark=remark,
-    alpha = alpha,
-    root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
-    use_hetero=use_hetero,
-)
+# n=9
+# A, B = generate_grid_matrices(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm_with_hetero(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=400,
+#     remark=remark,
+#     alpha = alpha,
+#     root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
+#     use_hetero=use_hetero,
+# )
 
-n=16
-A, B = generate_grid_matrices(n = n, seed=48)
-show_row(A)
-print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=1000,
-    remark=remark,
-    alpha = alpha,
-    root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
-    use_hetero=use_hetero,
-)
+# n=16
+# A, B = generate_grid_matrices(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm_with_hetero(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=1000,
+#     remark=remark,
+#     alpha = alpha,
+#     root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
+#     use_hetero=use_hetero,
+# )
 
-n=25
-A, B = generate_grid_matrices(n = n, seed=48)
-show_row(A)
-print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=1500,
-    remark=remark,
-    alpha = alpha,
-    root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
-    use_hetero=use_hetero,
-)
+# n=25
+# A, B = generate_grid_matrices(n = n, seed=48)
+# show_row(A)
+# print(A.shape)
+# train_track_grad_norm_with_hetero(
+#     algorithm="PushPull",
+#     lr=lr,
+#     A=A,
+#     B=B,
+#     dataset_name="MNIST",
+#     batch_size=bs,
+#     num_epochs=1500,
+#     remark=remark,
+#     alpha = alpha,
+#     root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
+#     use_hetero=use_hetero,
+# )

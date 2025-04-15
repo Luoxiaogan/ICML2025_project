@@ -1,0 +1,18 @@
+nohup: ignoring input
+A的第二大特征值: 0.687631584263735
+A的beta: 0.70474612254884
+A的spectral gap: 0.29525387745116005
+A的kappa: 2.2505538651420096
+S_A是: 69.4017007355934 
+
+(32, 32)
+使用异质性数据集
+函数内设置种子为: 2
+root: /home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/exp_mnist_tmp
+使用 PushPull 算法, 这里只记录grad_nrom
+直接从第一次 closure() 调用中获取初始值
+Initial grad norm: 0.00955330852593761, Initial avg grad norm: 0.0015635263407602906
+optimizer初始化成功!
+Training Progress:   0%|          | 0/2000 [00:00<?, ?it/s]/home/lg/ICML2025_project/utils/train_utils.py:210: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast(enabled=use_amp):
+Training Progress:   0%|          | 0/2000 [00:03<?, ?it/s, epoch=1, test_accuracy=11.2800%, test_loss=2.3019, train_loss=0.8191]Training Progress:   0%|          | 1/2000 [00:03<1:41:45,  3.05s/it, epoch=1, test_accuracy=11.2800%, test_loss=2.3019, train_loss=0.8191]Training Progress:   0%|          | 1/2000 [00:05<1:41:45,  3.05s/it, epoch=2, test_accuracy=11.7900%, test_loss=2.3014, train_loss=0.8218]Training Progress:   0%|          | 2/2000 [00:05<1:38:14,  2.95s/it, epoch=2, test_accuracy=11.7900%, test_loss=2.3014, train_loss=0.8218]Training Progress:   0%|          | 2/2000 [00:08<1:38:14,  2.95s/it, epoch=3, test_accuracy=12.2400%, test_loss=2.3010, train_loss=0.8217]Training Progress:   0%|          | 3/2000 [00:08<1:36:34,  2.90s/it, epoch=3, test_accuracy=12.2400%, test_loss=2.3010, train_loss=0.8217]Training Progress:   0%|          | 3/2000 [00:11<1:36:34,  2.90s/it, epoch=4, test_accuracy=12.4600%, test_loss=2.3006, train_loss=0.8215]Training Progress:   0%|          | 4/2000 [00:11<1:31:46,  2.76s/it, epoch=4, test_accuracy=12.4600%, test_loss=2.3006, train_loss=0.8215]Training Progress:   0%|          | 4/2000 [00:14<1:31:46,  2.76s/it, epoch=5, test_accuracy=12.7000%, test_loss=2.3002, train_loss=0.8213]Training Progress:   0%|          | 5/2000 [00:14<1:31:13,  2.74s/it, epoch=5, test_accuracy=12.7000%, test_loss=2.3002, train_loss=0.8213]Training Progress:   0%|          | 5/2000 [00:16<1:31:13,  2.74s/it, epoch=6, test_accuracy=12.7800%, test_loss=2.2998, train_loss=0.8211]Training Progress:   0%|          | 6/2000 [00:16<1:31:28,  2.75s/it, epoch=6, test_accuracy=12.7800%, test_loss=2.2998, train_loss=0.8211]Training Progress:   0%|          | 6/2000 [00:19<1:31:28,  2.75s/it, epoch=7, test_accuracy=13.1300%, test_loss=2.2993, train_loss=0.8209]Training Progress:   0%|          | 7/2000 [00:19<1:32:10,  2.78s/it, epoch=7, test_accuracy=13.1300%, test_loss=2.2993, train_loss=0.8209]Training Progress:   0%|          | 7/2000 [00:22<1:32:10,  2.78s/it, epoch=8, test_accuracy=13.8900%, test_loss=2.2989, train_loss=0.8208]Training Progress:   0%|          | 8/2000 [00:22<1:30:13,  2.72s/it, epoch=8, test_accuracy=13.8900%, test_loss=2.2989, train_loss=0.8208]

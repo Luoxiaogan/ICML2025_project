@@ -230,6 +230,7 @@ def train_track_grad_norm_with_hetero(
     root: str = None,
     use_hetero: bool = True,
     device = "cuda:0",
+    seed = 42
 )-> pd.DataFrame:
     """
     执行训练过程。
@@ -262,7 +263,7 @@ def train_track_grad_norm_with_hetero(
         if dataset_name == "CIFAR10":
             model_list = [new_ResNet18().to(device) for _ in range(n)]
             trainloader_list, testloader, full_trainloader = get_dataloaders_high_hetero_fixed_batch(
-                n, dataset_name, batch_size, repeat=1, alpha = alpha
+                n, dataset_name, batch_size, alpha = alpha, seed=seed
             )
             model_class = new_ResNet18
             #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_Multi_Gossip"
@@ -273,7 +274,7 @@ def train_track_grad_norm_with_hetero(
         elif dataset_name == "MNIST":
             model_list = [SimpleFCN().to(device) for _ in range(n)]
             trainloader_list, testloader, full_trainloader = get_dataloaders_high_hetero_fixed_batch(
-                n, dataset_name, batch_size, repeat=1, alpha = alpha
+                n, dataset_name, batch_size, alpha = alpha, seed=seed
             )
             model_class = SimpleFCN
             #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
@@ -406,7 +407,7 @@ def train_track_grad_norm_with_hetero(
             "test_accuracy(average)": test_average_accuracy_history,
             # "global_gradient_norm(average)": grad_norm_history,
         })
-        csv_filename = f"hetero={use_hetero}, alpha={alpha}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
+        csv_filename = remark+f"hetero={use_hetero}, alpha={alpha}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         csv_path = os.path.join(output_root, csv_filename)
         df.to_csv(csv_path, index=False)
@@ -415,7 +416,7 @@ def train_track_grad_norm_with_hetero(
             "grad_norm": grad_norm_history,
             "avg_grad_norm": grad_norm_avg_history,
         })
-        csv_filename = f"grad_norm,hetero={use_hetero}, alpha={alpha}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
+        csv_filename = remark+f"grad_norm,hetero={use_hetero},s alpha={alpha}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         csv_path = os.path.join(output_root, csv_filename)
         df.to_csv(csv_path, index=False)
 
