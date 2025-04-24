@@ -14,34 +14,44 @@ import torch
 from utils import ring1, show_row 
 from network_utils import get_matrixs_from_exp_graph, generate_grid_matrices, generate_ring_matrices
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
 lr = 3e-3
+num_epochs = 100
 bs = 128
 alpha = 0.9
 use_hetero=True
-remark= ""
-seed = 100
+remark="new"
+device = "cuda:0"
+root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist_tmp"
 
-n=4
+n=9
 A, B = generate_grid_matrices(n = n, seed=48)
 show_row(A)
 print(A.shape)
-train_track_grad_norm_with_hetero(
-    algorithm="PushPull",
-    lr=lr,
-    A=A,
-    B=B,
-    dataset_name="MNIST",
-    batch_size=bs,
-    num_epochs=300,
-    remark="newnewnew ",
-    alpha = alpha,
-    root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist",
-    use_hetero=use_hetero,
-    seed = 100
-)
+for i in range(20):
+    df = train_track_grad_norm_with_hetero(
+        algorithm="PushPull",
+        lr=lr,
+        A=A,
+        B=B,
+        dataset_name="MNIST",
+        batch_size=bs,
+        num_epochs=2000,
+        remark=remark,
+        alpha = alpha,
+        root = root,
+        use_hetero=use_hetero,
+        device=device,
+        seed = i+2
+    )
+     
+    if i == 0:
+        df_sum = df
+        sum = 1
+    else:
+        df_sum = df_sum+df
+        sum = sum + 1
+    df_output = df_sum/sum
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist_repeat/brand_new_for_draw_exp_n={n}_lr={lr}.csv")
 
 # n=9
 # A, B = generate_grid_matrices(n = n, seed=48)

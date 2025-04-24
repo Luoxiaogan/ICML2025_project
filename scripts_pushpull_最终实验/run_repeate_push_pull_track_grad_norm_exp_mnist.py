@@ -19,11 +19,11 @@ num_epochs = 100
 bs = 128
 alpha = 0.9
 use_hetero=True
-remark="new"
+remark="newnew"
 device = "cuda:1"
 root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/exp_mnist_tmp"
 
-n=32
+n=8
 A, B = get_matrixs_from_exp_graph(n = n, seed=48)
 show_row(A)
 print(A.shape)
@@ -35,7 +35,7 @@ for i in range(20):
         B=B,
         dataset_name="MNIST",
         batch_size=bs,
-        num_epochs=2000,
+        num_epochs=1000,
         remark=remark,
         alpha = alpha,
         root = root,
@@ -51,7 +51,7 @@ for i in range(20):
         df_sum = df_sum+df
         sum = sum + 1
     df_output = df_sum/sum
-    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/exp_mnist_10_repeat/for_draw_exp_n={n}_lr={lr}.csv")
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/exp_mnist_10_repeat/brand_new_for_draw_exp_n={n}_lr={lr}.csv")
 
 # n=8
 # A, B = get_matrixs_from_exp_graph(n = n, seed=48)
