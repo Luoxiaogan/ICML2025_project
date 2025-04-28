@@ -19,8 +19,8 @@ num_epochs = 100
 bs = 128
 alpha = 0.9
 use_hetero=True
-remark="new"
-device = "cuda:0"
+remark="new_new"
+device = "cuda:1"
 root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/ring_mnist_tmp"
 
 n=16
@@ -35,7 +35,7 @@ for i in range(20):
         B=B,
         dataset_name="MNIST",
         batch_size=bs,
-        num_epochs=2000,
+        num_epochs=4000,
         remark=remark,
         alpha = alpha,
         root = root,
@@ -51,7 +51,7 @@ for i in range(20):
         df_sum = df_sum+df
         sum = sum + 1
     df_output = df_sum/sum
-    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/ring_mnist_repeate/new_for_draw_exp_n={n}_lr={lr}.csv")
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/ring_mnist_repeate/brand_new_for_draw_exp_n={n}_lr={lr}.csv")
 
 # n=4
 # A, B = generate_ring_matrices(n = n, seed=42)

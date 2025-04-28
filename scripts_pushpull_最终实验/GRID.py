@@ -23,7 +23,7 @@ remark="new"
 device = "cuda:0"
 root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist_tmp"
 
-n=9
+n=25
 A, B = generate_grid_matrices(n = n, seed=48)
 show_row(A)
 print(A.shape)
@@ -35,7 +35,7 @@ for i in range(20):
         B=B,
         dataset_name="MNIST",
         batch_size=bs,
-        num_epochs=2000,
+        num_epochs=5000,
         remark=remark,
         alpha = alpha,
         root = root,
@@ -51,7 +51,7 @@ for i in range(20):
         df_sum = df_sum+df
         sum = sum + 1
     df_output = df_sum/sum
-    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist_repeat/brand_new_for_draw_exp_n={n}_lr={lr}.csv")
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/grid_mnist_repeat/new_brand_new_for_draw_exp_n={n}_lr={lr}.csv")
 
 # n=9
 # A, B = generate_grid_matrices(n = n, seed=48)
