@@ -622,3 +622,129 @@ def generate_ring_matrices(n, seed=42):
     B = Col(W)
 
     return A, B
+
+def generate_random_graph_matrices(n: int, seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
+    """
+    为随机图生成加权和归一化的邻接矩阵。
+
+    1. 创建一个n x n的初始0-1邻接矩阵N。
+       - N的对角线元素（自环）始终为1。
+       - 对于任何两个不同的节点i和j，边(i,j)以概率p=1/3存在（双向）。
+    2. 对于N中为1的位置，随机赋予1到3之间的整数权重，得到加权矩阵W。
+    3. 使用Row()和Col()函数对W进行归一化，得到矩阵A（行归一化）和B（列归一化）。
+
+    Args:
+        n (int): 节点数。
+        seed (int, optional): 随机数生成器的种子。默认为42。
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: 包含行归一化矩阵(A)和列归一化矩阵(B)的元组。
+    """
+    np.random.seed(seed)
+
+    # 1. 创建初始的0-1邻接矩阵 N
+    #    - 对角线元素为1 (自环)
+    #    - 非对角线元素 (i,j) 和 (j,i) 以概率 p=1/3 为1
+    
+    N = np.zeros((n, n), dtype=int)
+    prob_edge_exists = 1/3
+
+    # 设置自环 (对角线元素为1)
+    for i in range(n):
+        N[i, i] = 1
+
+    # 设置非对角线元素 (双向连接)
+    # 遍历上三角矩阵（不包括对角线）以避免重复判断和覆盖自环
+    for i in range(n):
+        for j in range(i + 1, n): # j > i
+            if np.random.rand() < prob_edge_exists:
+                N[i, j] = 1
+                N[j, i] = 1  # 因为是无向图，所以连接是双向的
+
+    # 2. 对N中为1的位置，随机赋予1到3的权重，得到矩阵W
+    W = np.zeros((n, n), dtype=float) # 使用float类型以便后续归一化
+
+    # 找到N中所有为1的元素的索引
+    rows, cols = np.where(N == 1)
+    
+    # 为这些位置生成随机权重 (1, 2, 或 3)
+    # np.random.randint 的上界是开区间，所以要得到[1,3]之间的整数，上界应为4
+    random_weights = np.random.randint(1, 3 + 1, size=len(rows))
+    W[rows, cols] = random_weights
+
+    # 3. 使用Row和Col函数进行归一化
+    A = Row(W)
+    B = Col(W)
+
+    return A, B
+
+
+
+def generate_stochastic_geometric_matrices(n, seed, threshold=5):
+    """
+    生成基于几何图的行随机矩阵 A 和列随机矩阵 B。
+
+    步骤:
+    1. 设置随机种子。
+    2. 生成 n 个节点的随机2D坐标。
+    3. 初始化一个 n x n 的零矩阵 W。
+    4. 将 W 的对角元素设置为 1 (保证自环的初始标记)。
+    5. 根据几何图定义：如果节点 i 和 j 之间的距离 <= threshold，
+       则将 W[i, j] 和 W[j, i] 设置为 1。
+    6. 对于 W 中所有值为 1 的元素（包括自环和几何连接），
+       将其随机重新赋值为 1、2 或 3。
+    7. Row 函数：对 W 进行行归一化得到行随机矩阵 A。
+    8. Col 函数：对 W 进行列归一化得到列随机矩阵 B。
+
+    参数:
+        n (int): 节点数目 (确保 n >= 6)。
+        seed (int): 随机种子。
+        threshold (float): 连接节点的距离阈值。
+
+    返回:
+        tuple: (A, B)
+               A: n x n 的行随机 numpy 数组。
+               B: n x n 的列随机 numpy 数组。
+    """
+    if not isinstance(n, int) or n < 6:
+        raise ValueError("节点数目 n 必须是大于等于6的整数。")
+    if not isinstance(seed, int):
+        raise ValueError("随机种子 seed 必须是整数。")
+
+    np.random.seed(seed)
+
+    # 1. 生成 n 个节点的随机2D坐标
+    # 为了使threshold有意义，我们将坐标限制在一个合理的范围内，例如 0 到 10
+    # 这个范围可以根据具体应用调整，以获得不同密度的图
+    positions = np.random.rand(n, 2) * 10  # 坐标范围 [0, 10) x [0, 10)
+
+    # 2. 初始化一个 n x n 的零矩阵 W
+    W = np.zeros((n, n))
+
+    # 3. 将 W 的对角元素设置为 1 (保证自环的初始标记)
+    np.fill_diagonal(W, 1)
+
+    # 4. 根据几何图定义连接边
+    for i in range(n):
+        for j in range(i + 1, n):  # 避免重复计算和i=j的情况
+            dist = np.linalg.norm(positions[i] - positions[j])
+            if dist <= threshold:
+                W[i, j] = 1
+                W[j, i] = 1  # 图是无向的
+
+    #print(W)
+
+    # 5. 对于W中值为1的元素，随机赋值1到3
+    # 找到所有值为1的元素的索引
+    one_indices = np.where(W == 1)
+    # 为这些位置生成随机值 (1, 2, 或 3)
+    random_values = np.random.choice([1, 2, 3], size=len(one_indices[0]))
+    W[one_indices] = random_values
+
+    # 6. Row函数归一化得到行随机A
+    A = Row(W)
+
+    # 7. Col函数归一化得到列随机B
+    B = Col(W)
+
+    return A, B
