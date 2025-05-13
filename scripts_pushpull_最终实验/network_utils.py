@@ -748,3 +748,90 @@ def generate_stochastic_geometric_matrices(n, seed, threshold=5):
     B = Col(W)
 
     return A, B
+
+from scipy.spatial.distance import cdist # For efficient distance calculation
+
+def generate_nearest_neighbor_matrices(n: int, k: int = 3, seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Generates加权和归一化的邻接矩阵 for a k-nearest neighbor graph.
+
+    Steps:
+    1. Set random seed.
+    2. Generate n random 2D coordinates for the nodes.
+    3. Initialize an n x n zero matrix W.
+    4. Mark self-loops: Set diagonal elements of W to 1.
+    5. For each node i, find its k nearest neighbors (excluding itself).
+       For each such neighbor j, mark W[i, j] = 1 and W[j, i] = 1 (undirected graph).
+       Note: A node might end up with more than k connections if it's a neighbor
+             to many other nodes. Self-loops are handled separately.
+    6. For all positions in W that are marked as 1 (self-loops or neighbor connections),
+       assign a random integer weight between 1 and 3.
+    7. Use Row() and Col() functions to normalize W, yielding matrices A (row-normalized)
+       and B (column-normalized).
+
+    Args:
+        n (int): Number of nodes. Must be >= 1.
+        k (int): Number of nearest neighbors to connect to (excluding self).
+                 Must be >= 0 and < n if n > 1. If n=1, k must be 0.
+        seed (int, optional): Seed for the random number generator. Defaults to 42.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: A tuple containing the row-normalized matrix (A)
+                                       and the column-normalized matrix (B).
+    """
+    if not isinstance(n, int) or n < 1:
+        raise ValueError("节点数目 n 必须是大于等于1的整数。")
+    if not isinstance(k, int) or k < 0:
+        raise ValueError("邻居数 k 必须是大于等于0的整数。")
+    if n == 1 and k != 0:
+        raise ValueError("如果 n=1, k 必须为 0。")
+    if n > 1 and k >= n:
+        raise ValueError("邻居数 k 必须小于节点数 n (当 n > 1)。")
+    if not isinstance(seed, int):
+        raise ValueError("随机种子 seed 必须是整数。")
+
+    np.random.seed(seed)
+
+    # 1. Generate n random 2D coordinates
+    #    Coordinates in a [0, 10) x [0, 10) square for reasonable spacing
+    positions = np.random.rand(n, 2) * 10
+
+    # 2. Initialize W and mark self-loops
+    W = np.zeros((n, n), dtype=float) # Use float for weights
+    np.fill_diagonal(W, 1) # Mark self-loops (will be weighted later)
+
+    # 3. Connect k-nearest neighbors (if n > 1 and k > 0)
+    if n > 1 and k > 0:
+        # Calculate all-pairs Euclidean distances
+        # cdist(XA, XB) computes the distance between each pair of rows in XA and XB.
+        # Here, XA and XB are both 'positions'.
+        all_distances = cdist(positions, positions)
+
+        for i in range(n):
+            # Get distances from node i to all other nodes
+            distances_from_i = all_distances[i, :]
+            
+            # Get indices of nodes sorted by distance from node i
+            # The first element (index 0) will be node i itself (distance 0)
+            sorted_neighbor_indices = np.argsort(distances_from_i)
+            
+            # Select the k nearest neighbors (skipping the node itself at index 0)
+            # These are sorted_neighbor_indices[1], ..., sorted_neighbor_indices[k]
+            for neighbor_idx in sorted_neighbor_indices[1 : k + 1]:
+                W[i, neighbor_idx] = 1
+                W[neighbor_idx, i] = 1 # Ensure graph is undirected
+
+    # 4. Assign random weights (1, 2, or 3) to all marked edges (where W[r,c] == 1)
+    #    This includes self-loops and neighbor connections.
+    rows, cols = np.where(W == 1)
+    num_edges_to_weight = len(rows)
+    
+    if num_edges_to_weight > 0: # Only assign weights if there are edges
+        random_weights = np.random.randint(1, 3 + 1, size=num_edges_to_weight)
+        W[rows, cols] = random_weights
+
+    # 5. Normalize using Row and Col functions
+    A = Row(W)
+    B = Col(W)
+
+    return A, B
