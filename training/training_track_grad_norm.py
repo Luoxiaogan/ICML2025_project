@@ -350,6 +350,8 @@ def train_track_grad_norm_with_hetero(
     test_average_loss_history = []
     test_average_accuracy_history = []
 
+    grad_norm_per_epoch = []
+
     grad_norm_history = [initial_grad_norm]
     grad_norm_avg_history = [initial_avg_grad_norm]
 
@@ -357,6 +359,8 @@ def train_track_grad_norm_with_hetero(
 
     for epoch in progress_bar:
         train_loss = 0.0
+
+        flag = 0
 
         for batch_idx, batch in enumerate(zip(*trainloader_list)):
             inputs = [
@@ -373,6 +377,10 @@ def train_track_grad_norm_with_hetero(
             grad_norm_history.append(grad_norm)
             grad_norm_avg_history.append(avg_grad_norm)
 
+            if flag == 0:
+                grad_norm_per_epoch.append(avg_grad_norm)
+                flag = 1
+        
         train_loss = train_loss / len(trainloader_list[0])
         train_loss_history.append(train_loss)
 
@@ -406,6 +414,7 @@ def train_track_grad_norm_with_hetero(
             "test_loss(average)": test_average_loss_history,
             "test_accuracy(average)": test_average_accuracy_history,
             # "global_gradient_norm(average)": grad_norm_history,
+            "grad_norm_per_epoch": grad_norm_per_epoch,
         })
         csv_filename = remark+f"hetero={use_hetero}, alpha={alpha}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
