@@ -14,19 +14,21 @@ import torch
 from utils import ring1, show_row 
 from network_utils import get_matrixs_from_exp_graph
 
-lr = 3e-2
+lr = 2e-3
 num_epochs = 100
 bs = 128
 alpha = 0.9
 use_hetero=True
-remark="single, lr=3e-2"
-device = "cuda:1"
-root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/with_smaller_lr"
+remark="full均匀(n=16),异质性分布"
+device = "cuda:0"
+root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/new_test_异质性"
 
-n=1
+n=16
 # A, B = get_matrixs_from_exp_graph(n = n)
-A = np.eye(1)
-B = np.eye(1)
+# A = np.eye(1)
+# B = np.eye(1)
+A = np.full((n, n), 1)/n
+B = np.full((n, n), 1)/n
 
 #show_row(A)
 print(A.shape)
@@ -54,4 +56,4 @@ for i in range(1):
         df_sum = df_sum+df
         sum = sum + 1
     df_output = df_sum/sum
-    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/with_smaller_lr/TTTTT_brand_new_for_draw_exp_n={n}_lr={lr}.csv")
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/new_test_异质性/new_for_draw_exp_n={n}_lr={lr}.csv")
