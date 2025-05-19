@@ -14,19 +14,21 @@ import torch
 from utils import ring1, show_row 
 from network_utils import get_matrixs_from_exp_graph
 
-lr = 5e-3
+lr = 3e-2
 num_epochs = 100
 bs = 128
 alpha = 0.9
 use_hetero=True
-remark="new"
-device = "cuda:0"
-root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp"
+remark="single, lr=3e-2"
+device = "cuda:1"
+root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/with_smaller_lr"
 
-n=16
-A, B = get_matrixs_from_exp_graph(n = n)
+n=1
+# A, B = get_matrixs_from_exp_graph(n = n)
+A = np.eye(1)
+B = np.eye(1)
 
-show_row(A)
+#show_row(A)
 print(A.shape)
 for i in range(1):
     df = train_track_grad_norm_with_hetero(
@@ -36,7 +38,7 @@ for i in range(1):
         B=B,
         dataset_name="MNIST",
         batch_size=bs,
-        num_epochs=3000,
+        num_epochs=2000,
         remark=remark,
         alpha = alpha,
         root = root,
@@ -52,4 +54,4 @@ for i in range(1):
         df_sum = df_sum+df
         sum = sum + 1
     df_output = df_sum/sum
-    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/TTTTT_brand_new_for_draw_exp_n={n}_lr={lr}.csv")
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/with_smaller_lr/TTTTT_brand_new_for_draw_exp_n={n}_lr={lr}.csv")
