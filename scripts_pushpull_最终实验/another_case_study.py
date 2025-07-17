@@ -19,16 +19,16 @@ num_epochs = 100
 bs = 128
 alpha = 0.9
 use_hetero=True
-remark="full均匀(n=16),异质性分布"
-device = "cuda:0"
-root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/new_test_异质性"
+remark="如果不用kaiming初始化exp(n=16),异质性分布_2_norm"
+device = "cuda:1"
+root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/consensus"
 
 n=16
-# A, B = get_matrixs_from_exp_graph(n = n)
+A, B = get_matrixs_from_exp_graph(n = n)
 # A = np.eye(1)
 # B = np.eye(1)
-A = np.full((n, n), 1)/n
-B = np.full((n, n), 1)/n
+# A = np.full((n, n), 1)/n
+# B = np.full((n, n), 1)/n
 
 #show_row(A)
 print(A.shape)
@@ -56,4 +56,4 @@ for i in range(1):
         df_sum = df_sum+df
         sum = sum + 1
     df_output = df_sum/sum
-    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/new_test_异质性/new_for_draw_exp_n={n}_lr={lr}.csv")
+    df_output.to_csv(f"/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/consensus/new_for_draw_exp_n={n}_lr={lr}.csv")

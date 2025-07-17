@@ -51,6 +51,97 @@ def compute_avg_gradient_matrix_norm(model_list):
     
     return avg_norm.item()
 
+import torch
+
+def compute_parameter_consensus_norm(model_list):
+    """
+    Computes a consensus metric based on model parameters.
+
+    The metric is calculated as follows:
+    1. For each model, its parameters are flattened into a vector.
+    2. An average parameter vector is computed across all models.
+    3. For each model, the difference between its parameter vector and the average parameter vector is found.
+    4. These difference vectors form the rows of a matrix.
+    5. The Frobenius norm of this difference matrix is calculated.
+       This is equivalent to sqrt(sum(||params_i - mean_params||_2^2 for each model i)).
+    6. This norm is then divided by the square root of the number of parameters in a single model.
+
+    Args:
+        model_list (list): A list of PyTorch nn.Module objects.
+                           It's assumed all models have the same architecture and parameter structure.
+
+    Returns:
+        float: The computed consensus norm. Returns 0.0 if the list is empty or models have no parameters.
+    """
+    if not model_list:
+        return 0.0
+
+    # Determine the total number of parameters (P) and device from the first model.
+    # We iterate over all parameters, not filtering by p.grad as in the gradient example.
+    try:
+        # Using list comprehension to ensure parameters are evaluated before sum,
+        # and to get a reference for the device.
+        first_model_actual_params = [p for p in model_list[0].parameters()]
+        if not first_model_actual_params: # Model has no parameters
+            num_params = 0
+            # Cannot determine device if there are no parameters.
+            # If num_params is 0, the function will return 0.0 anyway.
+            # However, if other models *do* have params, this is an inconsistency.
+            # For robust device handling, we'd need a parameter if num_params > 0.
+        else:
+            num_params = sum(p.numel() for p in first_model_actual_params)
+            device = first_model_actual_params[0].device
+
+    except StopIteration: # model_list[0].parameters() was empty
+        num_params = 0
+    
+    if num_params == 0:
+        return 0.0 # No parameters to compare.
+
+    num_models = len(model_list)
+    
+    # Initialize a tensor to store all models' flattened parameter vectors.
+    # Parameters are taken as '.data' to get their values without autograd history.
+    all_params_matrix = torch.zeros(num_models, num_params, device=device)
+    
+    for i, model in enumerate(model_list):
+        # Concatenate all parameters of the current model into a single vector.
+        # Ensure p.data is used to get the tensor data.
+        try:
+            params_flat = torch.cat([p.data.view(-1) for p in model.parameters()])
+            if params_flat.numel() != num_params:
+                raise ValueError(
+                    f"Model {i} has {params_flat.numel()} parameters, "
+                    f"but model 0 has {num_params}. All models must have the same structure."
+                )
+            all_params_matrix[i] = params_flat
+        except Exception as e:
+            # Handle cases where a model might be malformed or have no parameters when expecting some.
+            print(f"Error processing model {i}: {e}")
+            # Fill with NaNs or zeros, or raise error, depending on desired handling.
+            # For now, this will cause issues later if not consistent. Best to ensure consistent models.
+            # If an error occurs, this row might remain zeros, skewing results.
+            # It might be better to raise the error.
+            raise  # Re-raise the error to signal a problem with input models
+
+    # Calculate the mean parameter vector (average across models). Shape: (num_params,)
+    mean_param_vector = all_params_matrix.mean(dim=0)
+    
+    # Calculate the difference matrix: (all_params_matrix[i] - mean_param_vector). Shape: (num_models, num_params)
+    # mean_param_vector is broadcasted across rows.
+    diff_matrix = all_params_matrix - mean_param_vector
+    
+    # Calculate the Frobenius norm of the difference matrix.
+    # This is sqrt( sum_{i,j} (diff_matrix[i,j])^2 ), which corresponds to
+    # sqrt( sum_models ||params_model_i - mean_params||_2^2 ).
+    norm_val = torch.linalg.norm(diff_matrix, 2)
+    
+    # Normalize by sqrt(P) where P is num_params.
+    consensus_metric = norm_val #/ (num_params ** 0.5)
+    
+    return consensus_metric.item()
+
+
 def train_track_grad_norm(
     algorithm: str,
     lr: float,  
@@ -302,7 +393,7 @@ def train_track_grad_norm_with_hetero(
             )
             model_class = SimpleFCN
             #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/MNIST"
-            output_root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/real_data_track_grad_norm/new_mnist"
+            output_root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/case_study_use_exp/consensus"
             if root is not None:
                 output_root = root
                 print(f"root: {root}")
@@ -351,6 +442,7 @@ def train_track_grad_norm_with_hetero(
     test_average_accuracy_history = []
 
     grad_norm_per_epoch = []
+    consensus_per_epoch = []
 
     grad_norm_history = [initial_grad_norm]
     grad_norm_avg_history = [initial_avg_grad_norm]
@@ -390,6 +482,10 @@ def train_track_grad_norm_with_hetero(
         test_average_loss, test_accuracy = simple_compute_loss_and_accuracy(model_class=model_class, model_list=model_list, testloader=testloader)
         # train_average_loss_history.append(train_average_loss)
         # train_average_accuracy_history.append(train_accuracy)
+
+        consensus = compute_parameter_consensus_norm(model_list) 
+        consensus_per_epoch.append(consensus)
+
         test_average_loss_history.append(test_average_loss)
         test_average_accuracy_history.append(test_accuracy)
         # grad_norm_history.append(global_gradient_norm)
@@ -415,6 +511,7 @@ def train_track_grad_norm_with_hetero(
             "test_accuracy(average)": test_average_accuracy_history,
             # "global_gradient_norm(average)": grad_norm_history,
             "grad_norm_per_epoch": grad_norm_per_epoch,
+            "consensus_per_epoch": consensus_per_epoch,
         })
         csv_filename = remark+f"hetero={use_hetero}, alpha={alpha}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"

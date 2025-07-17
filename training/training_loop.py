@@ -22,6 +22,7 @@ def train(
     batch_size: int,
     num_epochs: int = 10,
     remark: str = "",
+    device: str = "cuda",
 )-> pd.DataFrame:
     """
     执行训练过程。
@@ -38,7 +39,8 @@ def train(
         remark (str): 备注
     """
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = device
     criterion = nn.CrossEntropyLoss()
     n = A.shape[0]
     A = torch.from_numpy(A).float().to(device)
@@ -51,7 +53,7 @@ def train(
         )
         model_class = new_ResNet18
         #output_root = "/root/GanLuo/ICML2025_project/outputs/logs/CIFAR10_Multi_Gossip"
-        output_root = "/root/GanLuo/ICML2025_project/outputs/CIFAR_MG_RING"
+        output_root = "/home/lg/ICML2025_project/PUSHPULL_PROJECT/最终的实验/CIFAR10最终实验"
     elif dataset_name == "MNIST":
         model_list = [SimpleFCN().to(device) for _ in range(n)]
         trainloader_list, testloader, full_trainloader = get_dataloaders(
@@ -101,13 +103,17 @@ def train(
     test_average_loss_history = []
     test_average_accuracy_history = []
     grad_norm_history = []
+    index_of_batch_count = []
 
     progress_bar = tqdm(range(num_epochs), desc="Training Progress")
+
+    index = 0
 
     for epoch in progress_bar:
         train_loss = 0.0
 
         for batch_idx, batch in enumerate(zip(*trainloader_list)):
+            index += 1
             inputs = [
                 data[0].to(device, non_blocking=True) for data in batch
             ]  # [data[0] for data in batch]
@@ -120,6 +126,7 @@ def train(
             train_loss += loss
         train_loss = train_loss / len(trainloader_list[0])
         train_loss_history.append(train_loss)
+        index_of_batch_count.append(index)
 
         # train_average_loss, train_accuracy, test_average_loss, test_accuracy, global_gradient_norm = compute_loss_and_accuracy(
         #     model_class=model_class, model_list=model_list, testloader=testloader, full_trainloader=full_trainloader
@@ -151,6 +158,7 @@ def train(
             "test_loss(average)": test_average_loss_history,
             "test_accuracy(average)": test_average_accuracy_history,
             # "global_gradient_norm(average)": grad_norm_history,
+            "communication_count": index_of_batch_count,
         })
         csv_filename = f"{remark}, {algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
         #csv_filename = f"{algorithm}, lr={lr}, n_nodes={n}, batch_size={batch_size}, {today_date}.csv"
